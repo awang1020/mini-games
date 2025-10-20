@@ -41,10 +41,41 @@ const createShuffledBoard = (): Card[] => {
   return shuffled;
 };
 
+const SCOREBOARD_STORAGE_KEY = 'memory-game-scores';
+
 const MemoryGame: FC = () => {
   const [board, setBoard] = useState<Card[]>(() => createShuffledBoard());
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
+  const [scores, setScores] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    try {
+      const storedScores = window.localStorage.getItem(SCOREBOARD_STORAGE_KEY);
+      if (!storedScores) {
+        return;
+      }
+
+      const parsedScores = JSON.parse(storedScores) as unknown;
+      if (!Array.isArray(parsedScores)) {
+        return;
+      }
+
+      const validScores = parsedScores
+        .map((score) => (typeof score === 'number' && Number.isFinite(score) ? score : null))
+        .filter((score): score is number => score !== null)
+        .sort((first, second) => first - second)
+        .slice(0, 5);
+
+      setScores(validScores);
+    } catch (error) {
+      console.error('Failed to load memory game scores', error);
+    }
+  }, []);
 
   useEffect(() => {
     if (flippedCards.length !== 2) {
@@ -112,12 +143,47 @@ const MemoryGame: FC = () => {
 
   const allMatched = useMemo(() => board.every((card) => card.isMatched), [board]);
 
+  useEffect(() => {
+    if (!allMatched || moves === 0) {
+      return;
+    }
+
+    setScores((previousScores) => {
+      const updatedScores = [...previousScores, moves].sort((first, second) => first - second).slice(0, 5);
+      return updatedScores;
+    });
+  }, [allMatched, moves]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(SCOREBOARD_STORAGE_KEY, JSON.stringify(scores));
+  }, [scores]);
+
+  const hasScores = scores.length > 0;
+
   return (
     <div className="flex w-full max-w-3xl flex-col items-center gap-6 text-white">
       <h1 className="text-4xl font-bold">Memory Game</h1>
       <div className="text-xl font-semibold" aria-live="polite">
         Moves: {moves}
       </div>
+      <section className="w-full max-w-sm rounded-lg bg-indigo-900/60 p-4">
+        <h2 className="text-lg font-semibold">Score Board</h2>
+        {hasScores ? (
+          <ol className="mt-2 list-decimal pl-5">
+            {scores.map((score, index) => (
+              <li key={`${score}-${index}`} className="py-1">
+                {score} move{score === 1 ? '' : 's'}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="mt-2 text-sm text-indigo-200">No scores yet. Finish a game to record your best moves!</p>
+        )}
+      </section>
       <div className="grid grid-cols-4 gap-4">
         {board.map((card) => {
           const isFaceUp = card.isFlipped || card.isMatched;
