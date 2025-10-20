@@ -127,9 +127,12 @@ const MemoryGame: FC = () => {
         ),
       );
 
-      setMoves((previousMoves) => previousMoves + 1);
-
       const nextFlipped = [...previousFlipped, id];
+
+      if (nextFlipped.length === 2) {
+        setMoves((previousMoves) => previousMoves + 1);
+      }
+
       return nextFlipped;
     });
   }, []);
