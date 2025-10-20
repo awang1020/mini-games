@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
+import type { FC } from 'react';
 
 interface ArrowButtonProps {
   direction: 'up' | 'down' | 'left' | 'right';
   onClick: () => void;
 }
 
-const ArrowButton: React.FC<ArrowButtonProps> = ({ direction, onClick }) => {
+const ArrowButton: FC<ArrowButtonProps> = ({ direction, onClick }) => {
   const getRotation = () => {
     switch (direction) {
       case 'up': return '-rotate-90';
@@ -17,10 +17,18 @@ const ArrowButton: React.FC<ArrowButtonProps> = ({ direction, onClick }) => {
     }
   };
 
+  const labelMap: Record<ArrowButtonProps['direction'], string> = {
+    up: 'Move tiles up',
+    down: 'Move tiles down',
+    left: 'Move tiles left',
+    right: 'Move tiles right',
+  };
+
   return (
     <button
       onClick={onClick}
-      className="bg-gray-700 hover:bg-gray-600 text-white font-bold p-4 rounded-lg transition-colors duration-200"
+      aria-label={labelMap[direction]}
+      className="rounded-lg bg-gray-700 p-4 font-bold text-white transition-colors duration-200 hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

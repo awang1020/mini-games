@@ -1,19 +1,85 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import type { FC, KeyboardEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
 import { generateSudoku } from '../../lib/sudoku';
 import Board from './sudoku/Board';
 import Controls from './sudoku/Controls';
-import WinModal from './sudoku/WinModal';
 import HighScoreBoard from './sudoku/HighScoreBoard';
+import WinModal from './sudoku/WinModal';
 
-const Sudoku = () => {
+const BOARD_SIZE = 9;
+const SUBGRID_SIZE = 3;
+
+type Difficulty = 'easy' | 'medium' | 'hard';
+
+type CellPosition = { row: number; col: number };
+
+type SerializedGame = {
+  savedBoard: number[][];
+  savedInitialBoard: number[][];
+  savedSolution: number[][];
+  savedDifficulty: Difficulty;
+  savedTime: number;
+  savedErrorCount: number;
+  savedHintCount: number;
+};
+
+const createEmptyConflictGrid = (): boolean[][] =>
+  Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(false));
+
+const isValueValid = (row: number, col: number, value: number, currentBoard: number[][]): boolean => {
+  for (let index = 0; index < BOARD_SIZE; index += 1) {
+    if (index !== row && currentBoard[index][col] === value) {
+      return false;
+    }
+    if (index !== col && currentBoard[row][index] === value) {
+      return false;
+    }
+  }
+
+  const startRow = Math.floor(row / SUBGRID_SIZE) * SUBGRID_SIZE;
+  const startCol = Math.floor(col / SUBGRID_SIZE) * SUBGRID_SIZE;
+
+  for (let offsetRow = 0; offsetRow < SUBGRID_SIZE; offsetRow += 1) {
+    for (let offsetCol = 0; offsetCol < SUBGRID_SIZE; offsetCol += 1) {
+      const currentRow = startRow + offsetRow;
+      const currentCol = startCol + offsetCol;
+      if ((currentRow !== row || currentCol !== col) && currentBoard[currentRow][currentCol] === value) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
+const calculateConflicts = (board: number[][]): boolean[][] => {
+  const conflicts = createEmptyConflictGrid();
+
+  for (let row = 0; row < BOARD_SIZE; row += 1) {
+    for (let col = 0; col < BOARD_SIZE; col += 1) {
+      const cellValue = board[row][col];
+      if (cellValue !== 0 && !isValueValid(row, col, cellValue, board)) {
+        conflicts[row][col] = true;
+      }
+    }
+  }
+
+  return conflicts;
+};
+
+const isBoardComplete = (board: number[][]): boolean =>
+  board.every((row) => row.every((cell) => cell !== 0));
+
+const Sudoku: FC = () => {
   const [board, setBoard] = useState<number[][]>([]);
   const [initialBoard, setInitialBoard] = useState<number[][]>([]);
   const [solution, setSolution] = useState<number[][]>([]);
-  const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
-  const [conflicts, setConflicts] = useState<boolean[][]>([]);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
+  const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null);
+  const [conflicts, setConflicts] = useState<boolean[][]>(createEmptyConflictGrid);
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isWon, setIsWon] = useState(false);
@@ -21,13 +87,48 @@ const Sudoku = () => {
   const [hintCount, setHintCount] = useState(0);
   const [showHighScores, setShowHighScores] = useState(false);
 
-  // Load game from localStorage on initial render
+  const updateHighScores = useCallback((newScore: number, level: Difficulty) => {
+    const savedScores = localStorage.getItem('sudokuHighScores');
+    const highScores = savedScores ? JSON.parse(savedScores) : { easy: [], medium: [], hard: [] };
+    const scores: number[] = highScores[level] ?? [];
+    scores.push(newScore);
+    scores.sort((a, b) => a - b);
+    highScores[level] = scores.slice(0, 5);
+    localStorage.setItem('sudokuHighScores', JSON.stringify(highScores));
+  }, []);
+
+  const newGame = useCallback(() => {
+    const { puzzle, solution: generatedSolution } = generateSudoku(difficulty);
+    const puzzleBoard = puzzle.map((row) => [...row]);
+    const initialBoardCopy = puzzleBoard.map((row) => [...row]);
+
+    setBoard(puzzleBoard);
+    setInitialBoard(initialBoardCopy);
+    setSolution(generatedSolution);
+    setConflicts(createEmptyConflictGrid());
+    setSelectedCell(null);
+    setTime(0);
+    setErrorCount(0);
+    setHintCount(0);
+    setIsRunning(true);
+    setIsWon(false);
+    localStorage.removeItem('sudokuGame');
+  }, [difficulty]);
+
   useEffect(() => {
     try {
       const savedGame = localStorage.getItem('sudokuGame');
       if (savedGame) {
-        const { savedBoard, savedInitialBoard, savedSolution, savedDifficulty, savedTime, savedErrorCount, savedHintCount } = JSON.parse(savedGame);
-        // Basic validation to prevent loading broken data
+        const {
+          savedBoard,
+          savedInitialBoard,
+          savedSolution,
+          savedDifficulty,
+          savedTime,
+          savedErrorCount,
+          savedHintCount,
+        } = JSON.parse(savedGame) as SerializedGame;
+
         if (savedBoard && savedSolution) {
           setBoard(savedBoard);
           setInitialBoard(savedInitialBoard);
@@ -36,115 +137,70 @@ const Sudoku = () => {
           setTime(savedTime);
           setErrorCount(savedErrorCount);
           setHintCount(savedHintCount);
+          setConflicts(calculateConflicts(savedBoard));
           setIsRunning(true);
+          setSelectedCell(null);
           return;
         }
       }
     } catch (error) {
-      console.error("Failed to load saved game:", error);
+      console.error('Failed to load saved game:', error);
     }
-    // If no valid saved game, start a new one
+
     newGame();
-  }, []);
+  }, [newGame]);
 
-  // Save game to localStorage
   useEffect(() => {
-    if (board.length > 0 && isRunning) {
-      const gameState = {
-        savedBoard: board,
-        savedInitialBoard: initialBoard,
-        savedSolution: solution,
-        savedDifficulty: difficulty,
-        savedTime: time,
-        savedErrorCount: errorCount,
-        savedHintCount: hintCount,
-      };
-      localStorage.setItem('sudokuGame', JSON.stringify(gameState));
+    if (board.length === 0 || !isRunning) {
+      return;
     }
-  }, [board, time, isRunning, errorCount, hintCount]);
 
-  const newGame = () => {
-    const { puzzle, solution } = generateSudoku(difficulty);
-    setBoard(puzzle);
-    setInitialBoard(puzzle);
-    setSolution(solution);
-    setConflicts(Array(9).fill(Array(9).fill(false)));
-    setTime(0);
-    setErrorCount(0);
-    setHintCount(0);
-    setIsRunning(true);
-    setIsWon(false);
-    localStorage.removeItem('sudokuGame');
-  };
+    const gameState: SerializedGame = {
+      savedBoard: board,
+      savedInitialBoard: initialBoard,
+      savedSolution: solution,
+      savedDifficulty: difficulty,
+      savedTime: time,
+      savedErrorCount: errorCount,
+      savedHintCount: hintCount,
+    };
+
+    localStorage.setItem('sudokuGame', JSON.stringify(gameState));
+  }, [board, difficulty, errorCount, hintCount, initialBoard, isRunning, solution, time]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout | undefined;
     if (isRunning) {
       interval = setInterval(() => {
-        setTime(prevTime => prevTime + 1);
+        setTime((previousTime) => previousTime + 1);
       }, 1000);
     }
-    return () => clearInterval(interval);
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, [isRunning]);
 
   useEffect(() => {
-    if (board.length > 0) {
-      checkForConflicts();
-      checkWin();
+    if (board.length === 0) {
+      return;
     }
-  }, [board]);
 
-  const checkWin = () => {
-    if (board.length > 0 && board.every(row => row.every(cell => cell !== 0)) && conflicts.every(row => row.every(cell => !cell))) {
+    const updatedConflicts = calculateConflicts(board);
+    setConflicts(updatedConflicts);
+
+    const hasConflicts = updatedConflicts.some((row) => row.some(Boolean));
+
+    if (!isWon && isBoardComplete(board) && !hasConflicts) {
       setIsRunning(false);
       setIsWon(true);
+      setSelectedCell(null);
       updateHighScores(time, difficulty);
       localStorage.removeItem('sudokuGame');
     }
-  };
-
-  const updateHighScores = (newScore: number, difficulty: 'easy' | 'medium' | 'hard') => {
-    const savedScores = localStorage.getItem('sudokuHighScores');
-    const highScores = savedScores ? JSON.parse(savedScores) : { easy: [], medium: [], hard: [] };
-    const scores = highScores[difficulty];
-    scores.push(newScore);
-    scores.sort((a: number, b: number) => a - b);
-    highScores[difficulty] = scores.slice(0, 5);
-    localStorage.setItem('sudokuHighScores', JSON.stringify(highScores));
-  };
-
-  const checkForConflicts = () => {
-    const newConflicts = Array(9).fill(null).map(() => Array(9).fill(false));
-    for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 9; j++) {
-        if (board[i][j] !== 0) {
-          if (!isValid(i, j, board[i][j], board)) {
-            newConflicts[i][j] = true;
-          }
-        }
-      }
-    }
-    setConflicts(newConflicts);
-  };
-
-  const isValid = (row: number, col: number, val: number, currentBoard: number[][]) => {
-    for (let i = 0; i < 9; i++) {
-      if (i !== row && currentBoard[i][col] === val) return false;
-      if (i !== col && currentBoard[row][i] === val) return false;
-    }
-
-    const startRow = Math.floor(row / 3) * 3;
-    const startCol = Math.floor(col / 3) * 3;
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        if ((startRow + i !== row || startCol + j !== col) && currentBoard[startRow + i][startCol + j] === val) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  };
+  }, [board, difficulty, isWon, time, updateHighScores]);
 
   const handleCellClick = (row: number, col: number) => {
     if (initialBoard[row][col] === 0) {
@@ -153,47 +209,64 @@ const Sudoku = () => {
   };
 
   const handleNumberClick = (num: number) => {
-    if (selectedCell) {
-      const { row, col } = selectedCell;
-      if (board[row][col] !== num) {
-        if (solution[row][col] !== num) {
-          setErrorCount(prev => prev + 1);
-        }
-        const newBoard = board.map(r => [...r]);
-        newBoard[row][col] = num;
-        setBoard(newBoard);
-      }
+    if (!selectedCell) {
+      return;
     }
+
+    const { row, col } = selectedCell;
+    if (board[row][col] === num) {
+      return;
+    }
+
+    if (solution[row][col] !== num) {
+      setErrorCount((previous) => previous + 1);
+    }
+
+    const updatedBoard = board.map((r) => [...r]);
+    updatedBoard[row][col] = num;
+    setBoard(updatedBoard);
   };
 
   const handleClearClick = () => {
-    if (selectedCell) {
-      const { row, col } = selectedCell;
-      const newBoard = board.map(r => [...r]);
-      newBoard[row][col] = 0;
-      setBoard(newBoard);
+    if (!selectedCell) {
+      return;
     }
+
+    const { row, col } = selectedCell;
+    if (initialBoard[row][col] !== 0) {
+      return;
+    }
+
+    const updatedBoard = board.map((r) => [...r]);
+    updatedBoard[row][col] = 0;
+    setBoard(updatedBoard);
   };
 
   const handleHintClick = () => {
-    if (selectedCell) {
-      const { row, col } = selectedCell;
-      if (board[row][col] === 0) {
-        const newBoard = board.map(r => [...r]);
-        newBoard[row][col] = solution[row][col];
-        setBoard(newBoard);
-        setHintCount(prev => prev + 1);
-      }
+    if (!selectedCell) {
+      return;
     }
+
+    const { row, col } = selectedCell;
+    if (board[row][col] !== 0) {
+      return;
+    }
+
+    const updatedBoard = board.map((r) => [...r]);
+    updatedBoard[row][col] = solution[row][col];
+    setBoard(updatedBoard);
+    setHintCount((previous) => previous + 1);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (selectedCell) {
-      if (e.key >= '1' && e.key <= '9') {
-        handleNumberClick(parseInt(e.key));
-      } else if (e.key === 'Backspace' || e.key === 'Delete') {
-        handleClearClick();
-      }
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!selectedCell) {
+      return;
+    }
+
+    if (event.key >= '1' && event.key <= '9') {
+      handleNumberClick(parseInt(event.key, 10));
+    } else if (event.key === 'Backspace' || event.key === 'Delete') {
+      handleClearClick();
     }
   };
 

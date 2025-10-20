@@ -1,11 +1,13 @@
 'use client';
 
-import React from 'react';
+import type { FC } from 'react';
 
-const Game2048Icon = () => (
+import type { GameIconProps } from '@/types/game';
+
+const Game2048Icon: FC<GameIconProps> = ({ className = 'h-16 w-16 text-white' }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-16 w-16 text-white mx-auto mb-4"
+    className={className}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"

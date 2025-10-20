@@ -1,111 +1,162 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import type { FC } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const cardImages = [
+type Card = {
+  id: number;
+  type: string;
+  isFlipped: boolean;
+  isMatched: boolean;
+};
+
+const CARD_IMAGES = [
   '/memory-game/angular.png',
   '/memory-game/aurelia.png',
   '/memory-game/backbone.png',
   '/memory-game/ember.png',
   '/memory-game/react.png',
   '/memory-game/vue.png',
-];
+] as const;
 
-interface Card {
-  id: number;
-  type: string;
-  isFlipped: boolean;
-  isMatched: boolean;
-}
-
-const createShuffledBoard = (): Card[] => {
-  const duplicatedCards = [...cardImages, ...cardImages];
-  const shuffled = duplicatedCards.sort(() => 0.5 - Math.random());
-  return shuffled.map((type, index) => ({
-    id: index,
-    type,
-    isFlipped: false,
-    isMatched: false,
-  }));
+const getCardAltText = (type: string): string => {
+  const fileName = type.split('/').pop()?.replace('.png', '') ?? 'card';
+  const label = fileName.replace(/[-_]/g, ' ').trim();
+  return `${label} card`;
 };
 
-const MemoryGame = () => {
-  const [board, setBoard] = useState<Card[]>(createShuffledBoard());
+const createShuffledBoard = (): Card[] => {
+  const duplicatedCards = [...CARD_IMAGES, ...CARD_IMAGES];
+  const shuffled = duplicatedCards
+    .map((type) => ({ type, sortKey: Math.random() }))
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map((entry, index) => ({
+      id: index,
+      type: entry.type,
+      isFlipped: false,
+      isMatched: false,
+    }));
+
+  return shuffled;
+};
+
+const MemoryGame: FC = () => {
+  const [board, setBoard] = useState<Card[]>(() => createShuffledBoard());
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
 
   useEffect(() => {
-    if (flippedCards.length === 2) {
-      const [firstCardId, secondCardId] = flippedCards;
-      const firstCard = board.find(c => c.id === firstCardId);
-      const secondCard = board.find(c => c.id === secondCardId);
+    if (flippedCards.length !== 2) {
+      return undefined;
+    }
 
-      if (firstCard && secondCard && firstCard.type === secondCard.type) {
-        setBoard(prevBoard =>
-          prevBoard.map(card =>
-            card.type === firstCard.type ? { ...card, isMatched: true } : card
-          )
-        );
-        setFlippedCards([]);
-      } else {
-        setTimeout(() => {
-          setBoard(prevBoard =>
-            prevBoard.map(card =>
-              flippedCards.includes(card.id) ? { ...card, isFlipped: false } : card
-            )
-          );
-          setFlippedCards([]);
-        }, 1000);
+    const [firstCardId, secondCardId] = flippedCards;
+    const firstCard = board.find((card) => card.id === firstCardId);
+    const secondCard = board.find((card) => card.id === secondCardId);
+
+    if (!firstCard || !secondCard) {
+      setFlippedCards([]);
+      return undefined;
+    }
+
+    if (firstCard.type === secondCard.type) {
+      setBoard((previousBoard) =>
+        previousBoard.map((card) =>
+          card.type === firstCard.type ? { ...card, isMatched: true } : card,
+        ),
+      );
+      setFlippedCards([]);
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setBoard((previousBoard) =>
+        previousBoard.map((card) =>
+          card.id === firstCardId || card.id === secondCardId
+            ? { ...card, isFlipped: false }
+            : card,
+        ),
+      );
+      setFlippedCards([]);
+    }, 800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [board, flippedCards]);
+
+  const handleCardClick = useCallback((id: number) => {
+    setFlippedCards((previousFlipped) => {
+      if (previousFlipped.length === 2 || previousFlipped.includes(id)) {
+        return previousFlipped;
       }
-    }
-  }, [flippedCards]);
 
-  const handleCardClick = (id: number) => {
-    const card = board.find(c => c.id === id);
-    if (!card || card.isFlipped || card.isMatched || flippedCards.length === 2) {
-      return;
-    }
+      setBoard((previousBoard) =>
+        previousBoard.map((card) =>
+          card.id === id ? { ...card, isFlipped: true } : card,
+        ),
+      );
 
-    setFlippedCards([...flippedCards, id]);
-    setBoard(prevBoard =>
-      prevBoard.map(c => (c.id === id ? { ...c, isFlipped: true } : c))
-    );
-    if(flippedCards.length === 1) {
-      setMoves(moves + 1);
-    }
-  };
+      const nextFlipped = [...previousFlipped, id];
+      if (nextFlipped.length === 2) {
+        setMoves((previousMoves) => previousMoves + 1);
+      }
+      return nextFlipped;
+    });
+  }, []);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setBoard(createShuffledBoard());
     setFlippedCards([]);
     setMoves(0);
-  };
+  }, []);
 
-  const allMatched = board.every(card => card.isMatched);
+  const allMatched = useMemo(() => board.every((card) => card.isMatched), [board]);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold mb-4">Memory Game</h1>
-      <div className="mb-4 text-xl font-semibold">Moves: {moves}</div>
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        {board.map(card => (
-          <div key={card.id} onClick={() => handleCardClick(card.id)} className="w-24 h-24 perspective-1000">
-            <div className={`relative w-full h-full transition-transform duration-700 transform-style-preserve-3d ${card.isFlipped || card.isMatched ? 'rotate-y-180' : ''}`}>
-              <div className="absolute w-full h-full bg-indigo-500 rounded-lg flex items-center justify-center backface-hidden">
-                {/* Card Back */}
+    <div className="flex w-full max-w-3xl flex-col items-center gap-6 text-white">
+      <h1 className="text-4xl font-bold">Memory Game</h1>
+      <div className="text-xl font-semibold" aria-live="polite">
+        Moves: {moves}
+      </div>
+      <div className="grid grid-cols-4 gap-4">
+        {board.map((card) => {
+          const isFaceUp = card.isFlipped || card.isMatched;
+          return (
+            <button
+              key={card.id}
+              type="button"
+              onClick={() => handleCardClick(card.id)}
+              className="h-24 w-24 perspective-1000 focus:outline-none"
+              aria-label={isFaceUp ? 'Card revealed' : 'Hidden card'}
+            >
+              <div
+                className={`relative h-full w-full transform transition-transform duration-500 transform-style-preserve-3d ${
+                  isFaceUp ? 'rotate-y-180' : ''
+                }`}
+              >
+                <div className="absolute flex h-full w-full items-center justify-center rounded-lg bg-indigo-500 backface-hidden" />
+                <div className="absolute flex h-full w-full items-center justify-center rounded-lg bg-white backface-hidden rotate-y-180">
+                  <Image
+                    src={card.type}
+                    alt={getCardAltText(card.type)}
+                    width={64}
+                    height={64}
+                    className="h-16 w-16"
+                  />
+                </div>
               </div>
-              <div className="absolute w-full h-full bg-white rounded-lg flex items-center justify-center rotate-y-180 backface-hidden">
-                <img src={card.type} alt="card" className="w-16 h-16" />
-              </div>
-            </div>
-          </div>
-        ))}
+            </button>
+          );
+        })}
       </div>
       {allMatched && (
-        <div className="text-2xl font-bold text-green-500 mb-4">You won in {moves} moves!</div>
+        <div className="text-2xl font-bold text-green-400" aria-live="polite">
+          You won in {moves} moves!
+        </div>
       )}
       <button
-        className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        type="button"
+        className="rounded-md bg-indigo-600 px-6 py-2 font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
         onClick={handleReset}
       >
         Reset Game

@@ -1,100 +1,93 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import type { FC } from 'react';
+import { useMemo, useState } from 'react';
 
-const TicTacToe = () => {
-  const [board, setBoard] = useState(Array(9).fill(null));
+type SquareValue = 'X' | 'O' | null;
+
+const WINNING_LINES: Array<[number, number, number]> = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+];
+
+const createInitialBoard = (): SquareValue[] => Array(9).fill(null);
+
+const calculateWinner = (squares: SquareValue[]): SquareValue | 'Draw' | null => {
+  for (const [a, b, c] of WINNING_LINES) {
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+
+  return squares.every((square) => square !== null) ? 'Draw' : null;
+};
+
+const TicTacToe: FC = () => {
+  const [board, setBoard] = useState<SquareValue[]>(createInitialBoard);
   const [isXNext, setIsXNext] = useState(true);
-  const [winner, setWinner] = useState<string | null>(null);
+
+  const winner = useMemo(() => calculateWinner(board), [board]);
 
   const handleClick = (index: number) => {
     if (winner || board[index]) {
       return;
     }
 
-    const newBoard = board.slice();
-    newBoard[index] = isXNext ? 'X' : 'O';
-    setBoard(newBoard);
-    setIsXNext(!isXNext);
+    setBoard((previousBoard) => {
+      const nextBoard = [...previousBoard];
+      nextBoard[index] = isXNext ? 'X' : 'O';
+      return nextBoard;
+    });
+    setIsXNext((previous) => !previous);
   };
-
-  const calculateWinner = (squares: (string | null)[]) => {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
-      }
-    }
-    if (squares.every(square => square !== null)) {
-        return 'Draw';
-    }
-    return null;
-  };
-
-  useEffect(() => {
-    const result = calculateWinner(board);
-    if (result) {
-      setWinner(result);
-    }
-  }, [board]);
 
   const handleReset = () => {
-    setBoard(Array(9).fill(null));
+    setBoard(createInitialBoard());
     setIsXNext(true);
-    setWinner(null);
   };
 
-  const renderSquare = (index: number) => {
-    const value = board[index];
-    const colorClass = value === 'X' ? 'text-blue-500' : 'text-red-500';
-    return (
-      <button
-        className={`w-24 h-24 border-2 border-gray-400 flex items-center justify-center text-4xl font-bold ${colorClass}`}
-        onClick={() => handleClick(index)}
-      >
-        {value}
-      </button>
-    );
-  };
-
-  let status;
-    if (winner) {
-        status = winner === 'Draw' ? "It's a Draw!" : `Winner: ${winner}`;
-    } else {
-        status = `Next player: ${isXNext ? 'X' : 'O'}`;
+  const statusMessage = useMemo(() => {
+    if (!winner) {
+      return `Next player: ${isXNext ? 'X' : 'O'}`;
     }
+    return winner === 'Draw' ? "It's a draw!" : `Winner: ${winner}`;
+  }, [winner, isXNext]);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold mb-8">Tic Tac Toe</h1>
-        <div className="mb-4 text-2xl font-semibold">{status}</div>
-        <div className="grid grid-cols-3">
-            {renderSquare(0)}
-            {renderSquare(1)}
-            {renderSquare(2)}
-            {renderSquare(3)}
-            {renderSquare(4)}
-            {renderSquare(5)}
-            {renderSquare(6)}
-            {renderSquare(7)}
-            {renderSquare(8)}
-        </div>
-        <button
-            className="mt-8 px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            onClick={handleReset}
-        >
-            Reset Game
-        </button>
+    <div className="flex w-full max-w-lg flex-col items-center justify-center gap-6 text-white">
+      <h1 className="text-4xl font-bold">Tic Tac Toe</h1>
+      <p className="text-xl font-semibold" aria-live="polite">
+        {statusMessage}
+      </p>
+      <div className="grid grid-cols-3 gap-3">
+        {board.map((value, index) => {
+          const colorClass = value === 'X' ? 'text-blue-400' : value === 'O' ? 'text-rose-400' : 'text-white';
+          return (
+            <button
+              key={index}
+              type="button"
+              className={`flex h-24 w-24 items-center justify-center rounded-lg border-2 border-gray-400 text-4xl font-bold transition hover:border-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 ${colorClass}`}
+              onClick={() => handleClick(index)}
+              aria-label={value ? `Cell ${index + 1} containing ${value}` : `Select cell ${index + 1}`}
+            >
+              {value}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        className="rounded-md bg-indigo-600 px-6 py-2 font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+        onClick={handleReset}
+      >
+        Reset Game
+      </button>
     </div>
   );
 };

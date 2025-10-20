@@ -1,75 +1,153 @@
+'use client';
 
-import React from 'react';
+import type { FC } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import styles from './Hangman.module.css';
 
-const words = [
-  'apple', 'banana', 'cat', 'dog', 'earth', 'friend', 'green', 'happy', 'island',
-  'juice', 'key', 'lemon', 'money', 'music', 'nature', 'ocean', 'phone', 'pizza',
-  'queen', 'river', 'soccer', 'sun', 'table', 'train', 'umbrella', 'violet',
-  'water', 'yellow', 'zebra'
-];
+const WORDS = [
+  'apple',
+  'banana',
+  'cat',
+  'dog',
+  'earth',
+  'friend',
+  'green',
+  'happy',
+  'island',
+  'juice',
+  'key',
+  'lemon',
+  'money',
+  'music',
+  'nature',
+  'ocean',
+  'phone',
+  'pizza',
+  'queen',
+  'river',
+  'soccer',
+  'sun',
+  'table',
+  'train',
+  'umbrella',
+  'violet',
+  'water',
+  'yellow',
+  'zebra',
+] as const;
 
-const Hangman = () => {
-  const [selectedWord, setSelectedWord] = React.useState('');
-  const [guessedLetters, setGuessedLetters] = React.useState<string[]>([]);
-  const [incorrectGuesses, setIncorrectGuesses] = React.useState(0);
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const MAX_ATTEMPTS = 6;
 
-  React.useEffect(() => {
-    setSelectedWord(words[Math.floor(Math.random() * words.length)]);
+const getRandomWord = () => WORDS[Math.floor(Math.random() * WORDS.length)];
+
+const Hangman: FC = () => {
+  const [selectedWord, setSelectedWord] = useState<string>('');
+  const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
+  const [incorrectGuesses, setIncorrectGuesses] = useState(0);
+
+  const startNewGame = useCallback(() => {
+    setSelectedWord(getRandomWord());
+    setGuessedLetters([]);
+    setIncorrectGuesses(0);
   }, []);
 
-  const handleGuess = (letter: string) => {
-    if (!guessedLetters.includes(letter)) {
-      setGuessedLetters([...guessedLetters, letter]);
-      if (!selectedWord.includes(letter)) {
-        setIncorrectGuesses(incorrectGuesses + 1);
+  useEffect(() => {
+    startNewGame();
+  }, [startNewGame]);
+
+  const handleGuess = useCallback(
+    (letter: string) => {
+      if (!selectedWord) {
+        return;
       }
+
+      setGuessedLetters((previousGuesses) => {
+        if (previousGuesses.includes(letter)) {
+          return previousGuesses;
+        }
+
+        if (!selectedWord.includes(letter)) {
+          setIncorrectGuesses((previous) => previous + 1);
+        }
+
+        return [...previousGuesses, letter];
+      });
+    },
+    [selectedWord],
+  );
+
+  const isGameOver = incorrectGuesses >= MAX_ATTEMPTS;
+  const isWinner = useMemo(() => {
+    if (!selectedWord) {
+      return false;
     }
-  };
+    return selectedWord.split('').every((letter) => guessedLetters.includes(letter));
+  }, [selectedWord, guessedLetters]);
 
-  const displayWord = selectedWord.split('').map(letter => (guessedLetters.includes(letter) ? letter : '_')).join(' ');
+  const displayWord = useMemo(() => {
+    if (!selectedWord) {
+      return '';
+    }
 
-  const isGameOver = incorrectGuesses >= 6;
-  const isWinner = !!(selectedWord && selectedWord.split('').every(letter => guessedLetters.includes(letter)));
+    return selectedWord
+      .split('')
+      .map((letter) => (guessedLetters.includes(letter) || isGameOver ? letter : '_'))
+      .join(' ');
+  }, [selectedWord, guessedLetters, isGameOver]);
 
   return (
     <div className={styles.container}>
-      <h1>Hangman</h1>
+      <h1 className={styles.title}>Hangman</h1>
       <div className={styles.gameContainer}>
-        <div className={styles.hangman}>
+        <div className={styles.hangman} aria-hidden="true">
           <div className={styles.scaffold} />
-          <div className={styles.head} style={{ display: incorrectGuesses > 0 ? 'block' : 'none' }} />
-          <div className={styles.body} style={{ display: incorrectGuesses > 1 ? 'block' : 'none' }} />
-          <div className={styles.leftArm} style={{ display: incorrectGuesses > 2 ? 'block' : 'none' }} />
-          <div className={styles.rightArm} style={{ display: incorrectGuesses > 3 ? 'block' : 'none' }} />
-          <div className={styles.leftLeg} style={{ display: incorrectGuesses > 4 ? 'block' : 'none' }} />
-          <div className={styles.rightLeg} style={{ display: incorrectGuesses > 5 ? 'block' : 'none' }} />
+          <div className={`${styles.head} ${incorrectGuesses > 0 ? styles.visible : ''}`} />
+          <div className={`${styles.body} ${incorrectGuesses > 1 ? styles.visible : ''}`} />
+          <div className={`${styles.leftArm} ${incorrectGuesses > 2 ? styles.visible : ''}`} />
+          <div className={`${styles.rightArm} ${incorrectGuesses > 3 ? styles.visible : ''}`} />
+          <div className={`${styles.leftLeg} ${incorrectGuesses > 4 ? styles.visible : ''}`} />
+          <div className={`${styles.rightLeg} ${incorrectGuesses > 5 ? styles.visible : ''}`} />
         </div>
-        <div className={styles.errorCounter}>
-          <p>Incorrect Guesses: {incorrectGuesses} / 6</p>
+        <div className={styles.errorCounter} aria-live="polite">
+          Incorrect Guesses: {incorrectGuesses} / {MAX_ATTEMPTS}
         </div>
       </div>
-      <p className={styles.word}>{displayWord}</p>
+      <p className={styles.word} aria-live="polite">
+        {displayWord}
+      </p>
       <div className={styles.alphabet}>
-        {'abcdefghijklmnopqrstuvwxyz'.split('').map(letter => (
-          <button
-            key={letter}
-            onClick={() => handleGuess(letter)}
-            disabled={guessedLetters.includes(letter) || isGameOver || isWinner}
-          >
-            {letter}
-          </button>
-        ))}
+        {ALPHABET.map((letter) => {
+          const isDisabled = guessedLetters.includes(letter) || isGameOver || isWinner;
+          return (
+            <button
+              key={letter}
+              type="button"
+              onClick={() => handleGuess(letter)}
+              disabled={isDisabled}
+              aria-pressed={guessedLetters.includes(letter)}
+              className={styles.letterButton}
+            >
+              {letter}
+            </button>
+          );
+        })}
       </div>
-      {isGameOver && <p className={styles.message}>You lost! The word was: {selectedWord}</p>}
-      {isWinner && <p className={styles.message}>You won!</p>}
+      {isGameOver && !isWinner && (
+        <p className={styles.message} role="alert">
+          You lost! The word was: {selectedWord}
+        </p>
+      )}
+      {isWinner && (
+        <p className={styles.message} role="status">
+          You won!
+        </p>
+      )}
       <button
+        type="button"
         className={styles.newGameButton}
-        onClick={() => {
-          setSelectedWord(words[Math.floor(Math.random() * words.length)]);
-          setGuessedLetters([]);
-          setIncorrectGuesses(0);
-        }}
+        onClick={startNewGame}
         aria-label="Start a new game"
       >
         New Game
