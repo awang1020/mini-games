@@ -119,6 +119,7 @@ const Sudoku: FC = () => {
     col: number;
     type: 'correct' | 'incorrect' | 'hint' | 'clear';
   } | null>(null);
+  const [highlightedNumber, setHighlightedNumber] = useState<number | null>(null);
 
   const hintsRemaining = Math.max(0, MAX_HINTS - hintCount);
   const hasBoard = board.length > 0;
@@ -154,6 +155,7 @@ const Sudoku: FC = () => {
     setBoardMessage(null);
     setLastAction(null);
     setDifficulty(level);
+    setHighlightedNumber(null);
     localStorage.removeItem('sudokuGame');
   }, []);
 
@@ -187,6 +189,19 @@ const Sudoku: FC = () => {
     initializeGame(level ?? difficulty);
   }, [difficulty, initializeGame]);
 
+  const updateHighlightedNumber = useCallback(
+    (num: number) => {
+      setHighlightedNumber((previous) => {
+        if (selectedCell) {
+          return num;
+        }
+
+        return previous === num ? null : num;
+      });
+    },
+    [selectedCell]
+  );
+
   useEffect(() => {
     if (hasBoard) {
       return;
@@ -218,6 +233,7 @@ const Sudoku: FC = () => {
           setConflicts(calculateConflicts(savedBoard));
           setIsRunning(true);
           setSelectedCell(null);
+          setHighlightedNumber(null);
           return;
         }
       }
@@ -331,7 +347,13 @@ const Sudoku: FC = () => {
   };
 
   const handleNumberClick = (num: number) => {
-    if (!hasBoard || !selectedCell) {
+    if (!hasBoard) {
+      return;
+    }
+
+    updateHighlightedNumber(num);
+
+    if (!selectedCell) {
       return;
     }
 
@@ -552,6 +574,11 @@ const Sudoku: FC = () => {
         event.preventDefault();
         moveSelection(0, 1);
         break;
+      case 'Escape':
+        event.preventDefault();
+        setSelectedCell(null);
+        setHighlightedNumber(null);
+        break;
       default:
         break;
     }
@@ -655,6 +682,7 @@ const Sudoku: FC = () => {
           board={board}
           initialBoard={initialBoard}
           selectedCell={selectedCell}
+          highlightedNumber={highlightedNumber}
           conflicts={conflicts}
           mismatches={mismatches}
           notes={notes}
@@ -676,6 +704,7 @@ const Sudoku: FC = () => {
           onShowHighScores={() => setShowHighScores(true)}
           onToggleNotesMode={() => setIsNotesMode((previous) => !previous)}
           onUndo={handleUndo}
+          selectedNumber={highlightedNumber}
         />
       </div>
 
