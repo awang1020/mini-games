@@ -17,7 +17,7 @@ const WORDS = [
   'chouette',
   'citrouille',
   'clé',
-  'cœur',
+  'coeur',
   'croissant',
   'école',
   'étoile',
