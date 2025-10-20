@@ -1,39 +1,46 @@
 'use client';
 
-import React from 'react';
-import TicTacToeIcon from './icons/TicTacToeIcon';
-import RockPaperScissorsIcon from './icons/RockPaperScissorsIcon';
+import type { FC } from 'react';
 
-interface Game {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-}
+import type { GameMetadata } from '@/types/game';
 
 interface GameMenuProps {
-  games: Game[];
-  onSelectGame: (gameId: string) => void;
+  games: GameMetadata[];
+  onSelectGame: (gameId: GameMetadata['id']) => void;
 }
 
-const GameMenu: React.FC<GameMenuProps> = ({ games, onSelectGame }) => {
+const GameMenu: FC<GameMenuProps> = ({ games, onSelectGame }) => {
   return (
-    <div className="p-8 bg-gray-800 text-white min-h-screen">
-      <h2 className="text-3xl font-bold mb-8 text-center">Choose a Game</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {games.map((game) => (
-          <div
-            key={game.id}
-            className="bg-gray-700 rounded-lg shadow-lg p-6 cursor-pointer transform hover:scale-105 transition-transform duration-300"
-            onClick={() => onSelectGame(game.id)}
-          >
-            {game.icon}
-            <h3 className="text-2xl font-bold mb-2 text-center">{game.title}</h3>
-            <p className="text-gray-400 text-center">{game.description}</p>
-          </div>
-        ))}
+    <section className="min-h-screen bg-gray-900 px-4 py-12 text-white">
+      <div className="mx-auto max-w-6xl">
+        <header className="mb-12 text-center">
+          <h1 className="text-4xl font-bold tracking-tight">Mini Games Arcade</h1>
+          <p className="mt-3 text-lg text-gray-300">
+            Choose a game to play and challenge yourself or your friends.
+          </p>
+        </header>
+        <ul className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+          {games.map((game) => {
+            const Icon = game.icon;
+            return (
+              <li key={game.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelectGame(game.id)}
+                  className="flex w-full flex-col items-center gap-4 rounded-2xl bg-gray-800 p-8 text-center shadow-lg transition-colors transition-transform duration-200 hover:-translate-y-1 hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+                >
+                  <Icon className="mx-auto h-16 w-16 text-indigo-300" />
+                  <div>
+                    <h2 className="text-2xl font-semibold">{game.title}</h2>
+                    <p className="mt-2 text-sm text-gray-300">{game.description}</p>
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       </div>
-    </div>
+    </section>
   );
 };
 

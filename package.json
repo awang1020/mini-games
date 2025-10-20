@@ -1,7 +1,8 @@
 {
-  "name": "portfolio-app",
+  "name": "mini-games-arcade",
   "version": "0.1.0",
   "private": true,
+  "description": "Collection of classic mini games built with Next.js, TypeScript, and Tailwind CSS.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +10,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "bootstrap": "^5.3.3",
     "next": "^14.2.30",
     "react": "^18",
     "react-dom": "^18"
