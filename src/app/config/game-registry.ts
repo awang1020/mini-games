@@ -1,11 +1,13 @@
 import type { GameConfig, GameId, GameMetadata } from '@/types/game';
 
+import FlappyBird from '../components/FlappyBird';
 import Game2048 from '../components/Game2048';
 import Hangman from '../components/Hangman';
 import MemoryGame from '../components/MemoryGame';
 import RockPaperScissors from '../components/RockPaperScissors';
 import Sudoku from '../components/Sudoku';
 import TicTacToe from '../components/TicTacToe';
+import FlappyBirdIcon from '../components/icons/FlappyBirdIcon';
 import Game2048Icon from '../components/icons/Game2048Icon';
 import HangmanIcon from '../components/icons/HangmanIcon';
 import MemoryGameIcon from '../components/icons/MemoryGameIcon';
@@ -114,6 +116,23 @@ export const gameRegistry: Record<GameId, GameConfig> = {
         'Guess one letter at a time to reveal the hidden word.',
         'Six incorrect guesses will complete the hangman—choose carefully.',
         'Reveal the full word before running out of attempts to win.',
+      ],
+    },
+  },
+  'flappy-bird': {
+    metadata: {
+      id: 'flappy-bird',
+      title: 'Flappy Bird',
+      description: 'Tap to flap through the pipes without touching them.',
+      icon: FlappyBirdIcon,
+    },
+    component: FlappyBird,
+    rules: {
+      title: 'Flappy Bird',
+      rules: [
+        'Tap, click, or press Space to make the bird flap upward.',
+        'Navigate through the gaps between the pipes—touching them ends the run.',
+        'Each pair of pipes you pass earns one point. Try to beat your best score!',
       ],
     },
   },

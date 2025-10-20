@@ -6,7 +6,8 @@ export type GameId =
   | 'memory-game'
   | '2048'
   | 'sudoku'
-  | 'hangman';
+  | 'hangman'
+  | 'flappy-bird';
 
 export interface GameIconProps {
   className?: string;
