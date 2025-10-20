@@ -49,36 +49,28 @@ const WORDS = [
   'voiture',
 ] as const;
 
-const ALPHABET = [
-  ...'abcdefghijklmnopqrstuvwxyz'.split(''),
-  'à',
-  'â',
-  'æ',
-  'ç',
-  'é',
-  'è',
-  'ê',
-  'ë',
-  'î',
-  'ï',
-  'ô',
-  'œ',
-  'ù',
-  'û',
-  'ü',
-  'ÿ',
-];
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
 const MAX_ATTEMPTS = 6;
 
 const getRandomWord = () => WORDS[Math.floor(Math.random() * WORDS.length)];
 
+const normalizeText = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae');
+
 const Hangman: FC = () => {
   const [selectedWord, setSelectedWord] = useState<string>('');
+  const [normalizedWord, setNormalizedWord] = useState<string>('');
   const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
   const [incorrectGuesses, setIncorrectGuesses] = useState(0);
 
   const startNewGame = useCallback(() => {
-    setSelectedWord(getRandomWord());
+    const word = getRandomWord();
+    setSelectedWord(word);
+    setNormalizedWord(normalizeText(word.toLowerCase()));
     setGuessedLetters([]);
     setIncorrectGuesses(0);
   }, []);
@@ -89,26 +81,35 @@ const Hangman: FC = () => {
 
   const handleGuess = useCallback(
     (letter: string) => {
-      if (!selectedWord || guessedLetters.includes(letter)) {
+      if (!selectedWord) {
         return;
       }
 
-      if (!selectedWord.includes(letter)) {
+      const normalizedLetter = normalizeText(letter.toLowerCase());
+
+      if (guessedLetters.includes(normalizedLetter)) {
+        return;
+      }
+
+      if (!normalizedWord.includes(normalizedLetter)) {
         setIncorrectGuesses((previous) => previous + 1);
       }
 
-      setGuessedLetters((previousGuesses) => [...previousGuesses, letter]);
+      setGuessedLetters((previousGuesses) => [...previousGuesses, normalizedLetter]);
     },
-    [selectedWord, guessedLetters],
+    [selectedWord, normalizedWord, guessedLetters],
   );
 
   const isGameOver = incorrectGuesses >= MAX_ATTEMPTS;
   const isWinner = useMemo(() => {
-    if (!selectedWord) {
+    if (!normalizedWord) {
       return false;
     }
-    return selectedWord.split('').every((letter) => guessedLetters.includes(letter));
-  }, [selectedWord, guessedLetters]);
+
+    return normalizedWord
+      .split('')
+      .every((letter) => letter === '' || guessedLetters.includes(letter));
+  }, [normalizedWord, guessedLetters]);
 
   const displayWord = useMemo(() => {
     if (!selectedWord) {
@@ -117,7 +118,15 @@ const Hangman: FC = () => {
 
     return selectedWord
       .split('')
-      .map((letter) => (guessedLetters.includes(letter) || isGameOver ? letter : '_'))
+      .map((letter) => {
+        const normalizedLetter = normalizeText(letter.toLowerCase());
+        const normalizedParts = normalizedLetter.split('');
+
+        const isRevealed =
+          isGameOver || normalizedParts.every((part) => guessedLetters.includes(part));
+
+        return isRevealed ? letter : '_';
+      })
       .join(' ');
   }, [selectedWord, guessedLetters, isGameOver]);
 
