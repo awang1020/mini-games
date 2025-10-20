@@ -212,7 +212,7 @@ const determinePlacement = (
   candidates.push(snapped);
   candidates.push(...getNeighborCoords(snapped.row, snapped.col).map(([row, col]) => ({ row, col })));
 
-  let best: { row: number; col: number; distance: number } | null = null;
+  let best: { row: number; col: number; distance: number; priority: number } | null = null;
 
   const consider = (row: number, col: number) => {
     if (row < 0 || col < 0 || col >= BOARD_COLS) {
@@ -224,8 +224,12 @@ const determinePlacement = (
     }
     const position = getBubblePosition(row, col);
     const distance = Math.hypot(position.x - x, position.y - y);
-    if (!best || distance < best.distance) {
-      best = { row, col, distance };
+    const anchored =
+      row === 0 ||
+      getNeighborCoords(row, col).some(([neighborRow, neighborCol]) => board[neighborRow]?.[neighborCol]);
+    const priority = anchored ? 0 : 1;
+    if (!best || priority < best.priority || (priority === best.priority && distance < best.distance)) {
+      best = { row, col, distance, priority };
     }
   };
 
@@ -363,6 +367,8 @@ const BubbleShooterGame = () => {
 
         const trimmed = trimEmptyRows(resolvedBoard);
 
+        boardStateRef.current = trimmed;
+
         if (hasReachedBottom(trimmed)) {
           triggeredGameOver = true;
         }
@@ -452,6 +458,9 @@ const BubbleShooterGame = () => {
       const newRow = Array.from({ length: BOARD_COLS }, () => randomColor());
       const shifted = [newRow, ...previous.map((row) => [...row])];
       const trimmed = trimEmptyRows(shifted);
+
+      boardStateRef.current = trimmed;
+
       if (hasReachedBottom(trimmed)) {
         triggeredGameOver = true;
       }
