@@ -299,20 +299,6 @@ const ConnectFour = () => {
               previous move.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleUndo}
-              disabled={!canUndo}
-              className={`rounded-md border border-gray-600 px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 ${
-                canUndo
-                  ? 'bg-gray-800 text-white hover:bg-gray-700'
-                  : 'cursor-not-allowed bg-gray-800/50 text-gray-500'
-              }`}
-            >
-              Undo
-            </button>
-          </div>
         </div>
       </header>
 
@@ -426,23 +412,37 @@ const ConnectFour = () => {
         </section>
 
         <aside className="rounded-lg border border-gray-700 bg-gray-900/80 p-4 shadow-lg lg:sticky lg:top-24">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:flex-col lg:items-start">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:flex-col lg:items-center">
             <div>
               <h2 className="text-xl font-semibold text-amber-300">Scoreboard</h2>
               <p className="text-sm text-gray-400">Track wins, losses, and draws at a glance.</p>
             </div>
-            <div className="flex flex-wrap gap-2 lg:w-full">
-              <button
-                type="button"
-                onClick={handleRestart}
-                className="flex-1 rounded-md border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 lg:flex-none"
-              >
-                Restart
-              </button>
+            <div className="flex w-full flex-col items-center gap-2">
+              <div className="flex w-full flex-col items-center gap-2 sm:flex-row sm:justify-center">
+                <button
+                  type="button"
+                  onClick={handleRestart}
+                  className="w-full min-w-[8rem] rounded-md border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:w-auto sm:flex-1 lg:flex-none"
+                >
+                  Restart
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUndo}
+                  disabled={!canUndo}
+                  className={`w-full min-w-[8rem] rounded-md border border-gray-600 px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:w-auto sm:flex-1 lg:flex-none ${
+                    canUndo
+                      ? 'bg-gray-800 text-white hover:bg-gray-700'
+                      : 'cursor-not-allowed bg-gray-800/50 text-gray-500'
+                  }`}
+                >
+                  Undo
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={handleResetScoreboard}
-                className="flex-1 rounded-md border border-gray-600 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 lg:flex-none"
+                className="w-full rounded-md border border-gray-600 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:w-auto sm:self-center"
               >
                 Reset Scoreboard
               </button>
