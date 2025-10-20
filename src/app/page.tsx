@@ -29,8 +29,8 @@ const Home: FC = () => {
   return (
     <main className="min-h-screen bg-gray-900 text-white">
       {selectedGameConfig && GameComponent ? (
-        <div className="flex h-screen flex-col md:flex-row">
-          <div className="relative flex-1 p-4">
+        <div className="flex min-h-dvh flex-col md:flex-row">
+          <div className="relative flex-1 p-4 md:overflow-y-auto md:px-6">
             <button
               type="button"
               className="absolute left-4 top-4 z-10 rounded-md bg-gray-700 px-4 py-2 font-semibold text-white transition hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
@@ -38,7 +38,7 @@ const Home: FC = () => {
             >
               Back to Menu
             </button>
-            <div className="flex h-full items-center justify-center">
+            <div className="flex min-h-full items-start justify-center pb-10 pt-14 md:pb-12 md:pt-16">
               <GameComponent />
             </div>
           </div>

@@ -289,174 +289,180 @@ const ConnectFour = () => {
   const canUndo = moveHistory.length > 0 && !winner && !isDraw;
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 text-white">
-      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold sm:text-4xl">Connect Four</h1>
-          <p className="mt-1 text-sm text-gray-300" id={instructionsId}>
-            Use Left and Right arrows to choose a column, then press Enter to drop a token. Undo to take back the
-            previous move.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleUndo}
-            disabled={!canUndo}
-            className={`rounded-md border border-gray-600 px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 ${
-              canUndo
-                ? 'bg-gray-800 text-white hover:bg-gray-700'
-                : 'cursor-not-allowed bg-gray-800/50 text-gray-500'
-            }`}
-          >
-            Undo
-          </button>
-        </div>
-      </div>
-
-      <div
-        className="rounded-lg border border-gray-700 bg-gray-900/80 p-4 shadow-lg"
-        aria-live="polite"
-        role="status"
-      >
-        <p className={`text-lg font-semibold ${statusColorClass}`}>
-          {statusMessage}
-        </p>
-      </div>
-
-      <div className="rounded-lg border border-gray-700 bg-gray-900/80 p-4 shadow-lg">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 pb-10 pt-6 text-white sm:px-6">
+      <header className="sticky top-0 z-20 -mx-4 -mt-6 flex flex-col gap-4 bg-gray-900/95 px-4 pb-4 pt-3 shadow-lg backdrop-blur sm:-mx-6 sm:px-6">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-xl font-semibold text-amber-300">Scoreboard</h2>
-            <p className="text-sm text-gray-400">Track wins, losses, and draws at a glance.</p>
+            <h1 className="text-3xl font-bold sm:text-4xl">Connect Four</h1>
+            <p className="mt-1 text-sm text-gray-300" id={instructionsId}>
+              Use Left and Right arrows to choose a column, then press Enter to drop a token. Undo to take back the
+              previous move.
+            </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleRestart}
-              className="rounded-md border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+              onClick={handleUndo}
+              disabled={!canUndo}
+              className={`rounded-md border border-gray-600 px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 ${
+                canUndo
+                  ? 'bg-gray-800 text-white hover:bg-gray-700'
+                  : 'cursor-not-allowed bg-gray-800/50 text-gray-500'
+              }`}
             >
-              Restart
-            </button>
-            <button
-              type="button"
-              onClick={handleResetScoreboard}
-              className="rounded-md border border-gray-600 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
-            >
-              Reset Scoreboard
+              Undo
             </button>
           </div>
         </div>
-        <dl className="mt-4 grid grid-cols-1 gap-3 text-sm text-gray-200 sm:grid-cols-3">
-          <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
-            <dt className="text-xs uppercase tracking-wide text-gray-400">Player 1</dt>
-            <dd className="mt-1 text-2xl font-bold text-red-400">{scoreboard.player1}</dd>
-          </div>
-          <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
-            <dt className="text-xs uppercase tracking-wide text-gray-400">Player 2</dt>
-            <dd className="mt-1 text-2xl font-bold text-yellow-300">{scoreboard.player2}</dd>
-          </div>
-          <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
-            <dt className="text-xs uppercase tracking-wide text-gray-400">Draws</dt>
-            <dd className="mt-1 text-2xl font-bold text-gray-200">{scoreboard.draws}</dd>
-          </div>
-        </dl>
-      </div>
+      </header>
 
-      <div className="relative mx-auto w-full max-w-3xl">
-        <div className="relative aspect-[7/6]">
+      <div className="flex flex-1 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(230px,1fr)] lg:items-start lg:gap-8">
+        <section className="flex flex-col gap-6">
           <div
-            role="grid"
-            aria-label="Connect Four board"
-            aria-rowcount={ROW_COUNT}
-            aria-colcount={COLUMN_COUNT}
-            aria-describedby={instructionsId}
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setBoardHasFocus(true)}
-            onBlur={() => setBoardHasFocus(false)}
-            onMouseLeave={() => setHoveredColumn(null)}
-            className="relative z-10 grid h-full w-full grid-cols-7 grid-rows-6 gap-2 rounded-3xl bg-blue-950/80 p-3 outline-none focus-visible:ring-4 focus-visible:ring-amber-300/80"
+            className="rounded-lg border border-gray-700 bg-gray-900/80 p-4 shadow-lg"
+            aria-live="polite"
+            role="status"
           >
-            {board.map((row, rowIndex) =>
-              row.map((cell, columnIndex) => {
-                const key = `${rowIndex}-${columnIndex}`;
-                const cellIsWinning = winningCellKeys.has(key);
-                const isHighlighted = highlightedColumn === columnIndex;
-                const isPreviewCell =
-                  previewRow !== null && previewRow === rowIndex && highlightedColumn === columnIndex;
-                const isLastMoveCell =
-                  lastMove !== null && lastMove.row === rowIndex && lastMove.column === columnIndex;
-
-                const cellBackground = [
-                  'relative flex items-center justify-center rounded-full border-2 border-blue-500/50 bg-blue-900/70 transition-colors duration-200',
-                  isHighlighted && !winner && !isDraw ? 'bg-blue-800' : null,
-                  cellIsWinning ? 'ring-4 ring-amber-300/80' : null,
-                ]
-                  .filter(Boolean)
-                  .join(' ');
-
-                return (
-                  <div
-                    key={key}
-                    role="gridcell"
-                    aria-colindex={columnIndex + 1}
-                    aria-rowindex={rowIndex + 1}
-                    className={cellBackground}
-                    onMouseEnter={() => setHoveredColumn(columnIndex)}
-                    onClick={() => handleDrop(columnIndex)}
-                  >
-                    <div className="relative flex h-[80%] w-[80%] items-center justify-center">
-                      {cell !== 0 ? (
-                        <div
-                          className={`h-full w-full rounded-full shadow-lg transition-transform duration-200 ${
-                            playerColorClasses[cell]
-                          } ${isLastMoveCell ? 'animate-token-drop' : ''}`}
-                        />
-                      ) : null}
-                      {cell === 0 && isPreviewCell ? (
-                        <div
-                          className={`h-full w-full rounded-full border-2 border-dashed opacity-70 ${
-                            playerColorClasses[currentPlayer]
-                          }`}
-                        />
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              }),
-            )}
+            <p className={`text-lg font-semibold ${statusColorClass}`}>
+              {statusMessage}
+            </p>
           </div>
 
-          {(winner || isDraw) && (
-            <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center">
-              <div className="rounded-full bg-gray-900/90 px-6 py-3 text-lg font-semibold text-amber-300 shadow-lg">
-                {winner ? `Game Over — Player ${winner.player} wins!` : 'Game Over — Draw!'}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+          <div className="relative mx-auto w-full max-w-3xl lg:mx-0">
+            <div className="relative aspect-[7/6]" style={{ maxHeight: 'min(65dvh, 32rem)' }}>
+              <div
+                role="grid"
+                aria-label="Connect Four board"
+                aria-rowcount={ROW_COUNT}
+                aria-colcount={COLUMN_COUNT}
+                aria-describedby={instructionsId}
+                tabIndex={0}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setBoardHasFocus(true)}
+                onBlur={() => setBoardHasFocus(false)}
+                onMouseLeave={() => setHoveredColumn(null)}
+                className="relative z-10 grid h-full w-full grid-cols-7 grid-rows-6 gap-2 rounded-3xl bg-blue-950/80 p-3 outline-none focus-visible:ring-4 focus-visible:ring-amber-300/80"
+              >
+                {board.map((row, rowIndex) =>
+                  row.map((cell, columnIndex) => {
+                    const key = `${rowIndex}-${columnIndex}`;
+                    const cellIsWinning = winningCellKeys.has(key);
+                    const isHighlighted = highlightedColumn === columnIndex;
+                    const isPreviewCell =
+                      previewRow !== null && previewRow === rowIndex && highlightedColumn === columnIndex;
+                    const isLastMoveCell =
+                      lastMove !== null && lastMove.row === rowIndex && lastMove.column === columnIndex;
 
-      <div className="mt-2 grid grid-cols-1 gap-3 text-sm text-gray-300 sm:grid-cols-3">
-        <div className="flex items-center gap-3">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-gray-900">
-            1
-          </span>
-          <span>Player 1 — Red tokens</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-gray-900">
-            2
-          </span>
-          <span>Player 2 — Yellow tokens</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-gray-400 text-xs font-bold text-gray-200">
-            •
-          </span>
-          <span>Preview shows the next drop position</span>
-        </div>
+                    const cellBackground = [
+                      'relative flex items-center justify-center rounded-full border-2 border-blue-500/50 bg-blue-900/70 transition-colors duration-200',
+                      isHighlighted && !winner && !isDraw ? 'bg-blue-800' : null,
+                      cellIsWinning ? 'ring-4 ring-amber-300/80' : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' ');
+
+                    return (
+                      <div
+                        key={key}
+                        role="gridcell"
+                        aria-colindex={columnIndex + 1}
+                        aria-rowindex={rowIndex + 1}
+                        className={cellBackground}
+                        onMouseEnter={() => setHoveredColumn(columnIndex)}
+                        onClick={() => handleDrop(columnIndex)}
+                      >
+                        <div className="relative flex h-[80%] w-[80%] items-center justify-center">
+                          {cell !== 0 ? (
+                            <div
+                              className={`h-full w-full rounded-full shadow-lg transition-transform duration-200 ${
+                                playerColorClasses[cell]
+                              } ${isLastMoveCell ? 'animate-token-drop' : ''}`}
+                            />
+                          ) : null}
+                          {cell === 0 && isPreviewCell ? (
+                            <div
+                              className={`h-full w-full rounded-full border-2 border-dashed opacity-70 ${
+                                playerColorClasses[currentPlayer]
+                              }`}
+                            />
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  }),
+                )}
+              </div>
+
+              {(winner || isDraw) && (
+                <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center">
+                  <div className="rounded-full bg-gray-900/90 px-6 py-3 text-lg font-semibold text-amber-300 shadow-lg">
+                    {winner ? `Game Over — Player ${winner.player} wins!` : 'Game Over — Draw!'}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-2 grid grid-cols-1 gap-3 text-sm text-gray-300 sm:grid-cols-3">
+            <div className="flex items-center gap-3">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-gray-900">
+                1
+              </span>
+              <span>Player 1 — Red tokens</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-gray-900">
+                2
+              </span>
+              <span>Player 2 — Yellow tokens</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-gray-400 text-xs font-bold text-gray-200">
+                •
+              </span>
+              <span>Preview shows the next drop position</span>
+            </div>
+          </div>
+        </section>
+
+        <aside className="rounded-lg border border-gray-700 bg-gray-900/80 p-4 shadow-lg lg:sticky lg:top-24">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:flex-col lg:items-start">
+            <div>
+              <h2 className="text-xl font-semibold text-amber-300">Scoreboard</h2>
+              <p className="text-sm text-gray-400">Track wins, losses, and draws at a glance.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 lg:w-full">
+              <button
+                type="button"
+                onClick={handleRestart}
+                className="flex-1 rounded-md border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 lg:flex-none"
+              >
+                Restart
+              </button>
+              <button
+                type="button"
+                onClick={handleResetScoreboard}
+                className="flex-1 rounded-md border border-gray-600 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 lg:flex-none"
+              >
+                Reset Scoreboard
+              </button>
+            </div>
+          </div>
+          <dl className="mt-4 grid grid-cols-1 gap-3 text-sm text-gray-200 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
+              <dt className="text-xs uppercase tracking-wide text-gray-400">Player 1</dt>
+              <dd className="mt-1 text-2xl font-bold text-red-400">{scoreboard.player1}</dd>
+            </div>
+            <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
+              <dt className="text-xs uppercase tracking-wide text-gray-400">Player 2</dt>
+              <dd className="mt-1 text-2xl font-bold text-yellow-300">{scoreboard.player2}</dd>
+            </div>
+            <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
+              <dt className="text-xs uppercase tracking-wide text-gray-400">Draws</dt>
+              <dd className="mt-1 text-2xl font-bold text-gray-200">{scoreboard.draws}</dd>
+            </div>
+          </dl>
+        </aside>
       </div>
     </div>
   );
