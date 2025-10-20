@@ -115,39 +115,32 @@ const MemoryGame: FC = () => {
     return () => window.clearTimeout(timeoutId);
   }, [board, flippedCards]);
 
-  const handleCardClick = useCallback((id: number) => {
-    setFlippedCards((previousFlipped) => {
-      if (previousFlipped.length === 2 || previousFlipped.includes(id)) {
-        return previousFlipped;
-      }
-
-      let shouldFlipCard = false;
-
-      setBoard((previousBoard) => {
-        const cardToFlip = previousBoard.find((card) => card.id === id);
-
-        if (!cardToFlip || cardToFlip.isMatched || cardToFlip.isFlipped) {
-          return previousBoard;
+  const handleCardClick = useCallback(
+    (id: number) => {
+      setFlippedCards((previousFlipped) => {
+        if (previousFlipped.length === 2 || previousFlipped.includes(id)) {
+          return previousFlipped;
         }
 
-        shouldFlipCard = true;
+        const cardToFlip = board.find((card) => card.id === id);
 
-        return previousBoard.map((card) =>
-          card.id === id ? { ...card, isFlipped: true } : card,
+        if (!cardToFlip || cardToFlip.isMatched || cardToFlip.isFlipped) {
+          return previousFlipped;
+        }
+
+        setBoard((previousBoard) =>
+          previousBoard.map((card) =>
+            card.id === id ? { ...card, isFlipped: true } : card,
+          ),
         );
+
+        setMoves((previousMoves) => previousMoves + 1);
+
+        return [...previousFlipped, id];
       });
-
-      if (!shouldFlipCard) {
-        return previousFlipped;
-      }
-
-      const nextFlipped = [...previousFlipped, id];
-
-      setMoves((previousMoves) => previousMoves + 1);
-
-      return nextFlipped;
-    });
-  }, []);
+    },
+    [board],
+  );
 
   const handleReset = useCallback(() => {
     setBoard(createShuffledBoard());
