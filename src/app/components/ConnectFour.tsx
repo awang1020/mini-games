@@ -130,6 +130,7 @@ const ConnectFour = () => {
   });
 
   const instructionsId = useId();
+  const undoHelpTextId = useId();
 
   const highlightedColumn = hoveredColumn ?? (boardHasFocus ? focusColumn : null);
 
@@ -243,6 +244,10 @@ const ConnectFour = () => {
   }, []);
 
   const handleUndo = useCallback(() => {
+    if (winner || isDraw) {
+      return;
+    }
+
     setMoveHistory((history) => {
       if (history.length === 0) {
         return history;
@@ -264,7 +269,7 @@ const ConnectFour = () => {
 
       return updatedHistory;
     });
-  }, []);
+  }, [isDraw, winner]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -285,8 +290,12 @@ const ConnectFour = () => {
         const columnToDrop = highlightedColumn ?? focusColumn;
         handleDrop(columnToDrop);
       }
+      if ((event.key === 'z' || event.key === 'Z') && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        handleUndo();
+      }
     },
-    [focusColumn, handleDrop, highlightedColumn],
+    [focusColumn, handleDrop, handleUndo, highlightedColumn],
   );
 
   const canUndo = moveHistory.length > 0 && !winner && !isDraw;
@@ -433,15 +442,30 @@ const ConnectFour = () => {
                   type="button"
                   onClick={handleUndo}
                   disabled={!canUndo}
-                  className={`${controlButtonBase} border-gray-600 ${
+                  aria-disabled={!canUndo}
+                  aria-describedby={undoHelpTextId}
+                  title={
                     canUndo
-                      ? 'bg-gray-800 text-white hover:bg-gray-700'
-                      : 'cursor-not-allowed bg-gray-800/50 text-gray-500'
+                      ? 'Undo the previous move (Ctrl+Z)'
+                      : 'Make a move to enable undo'
+                  }
+                  className={`${controlButtonBase} w-full flex-col items-start gap-1 text-left sm:w-auto sm:flex-1 ${
+                    canUndo
+                      ? 'border-sky-500 bg-sky-500 text-gray-900 hover:bg-sky-400 focus-visible:ring-sky-300'
+                      : 'cursor-not-allowed border-gray-600 bg-gray-800/60 text-gray-500'
                   }`}
                 >
-                  Undo
+                  <span className="text-sm font-semibold">Undo Last Move</span>
+                  <span className="text-xs text-gray-200">Shortcut: Ctrl+Z</span>
                 </button>
               </div>
+              <p
+                id={undoHelpTextId}
+                className="w-full text-center text-xs text-gray-400 sm:text-left"
+              >
+                Undo removes the last token placed so you can quickly correct mistakes. Try the Ctrl+Z shortcut for even
+                faster access.
+              </p>
               <button
                 type="button"
                 onClick={handleResetScoreboard}
