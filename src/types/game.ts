@@ -8,7 +8,8 @@ export type GameId =
   | 'sudoku'
   | 'hangman'
   | 'flappy-bird'
-  | 'connect-four';
+  | 'connect-four'
+  | 'bubble-shooter';
 
 export interface GameIconProps {
   className?: string;
