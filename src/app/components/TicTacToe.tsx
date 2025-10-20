@@ -1,7 +1,7 @@
 'use client';
 
 import type { FC } from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 type SquareValue = 'X' | 'O' | null;
 
@@ -31,8 +31,28 @@ const calculateWinner = (squares: SquareValue[]): SquareValue | 'Draw' | null =>
 const TicTacToe: FC = () => {
   const [board, setBoard] = useState<SquareValue[]>(createInitialBoard);
   const [isXNext, setIsXNext] = useState(true);
+  const [scores, setScores] = useState({ x: 0, o: 0, draws: 0 });
+  const [hasRecordedResult, setHasRecordedResult] = useState(false);
 
   const winner = useMemo(() => calculateWinner(board), [board]);
+
+  useEffect(() => {
+    if (!winner || hasRecordedResult) {
+      return;
+    }
+
+    setScores((previousScores) => {
+      if (winner === 'X') {
+        return { ...previousScores, x: previousScores.x + 1 };
+      }
+      if (winner === 'O') {
+        return { ...previousScores, o: previousScores.o + 1 };
+      }
+      return { ...previousScores, draws: previousScores.draws + 1 };
+    });
+
+    setHasRecordedResult(true);
+  }, [winner, hasRecordedResult]);
 
   const handleClick = (index: number) => {
     if (winner || board[index]) {
@@ -50,6 +70,7 @@ const TicTacToe: FC = () => {
   const handleReset = () => {
     setBoard(createInitialBoard());
     setIsXNext(true);
+    setHasRecordedResult(false);
   };
 
   const statusMessage = useMemo(() => {
@@ -62,6 +83,23 @@ const TicTacToe: FC = () => {
   return (
     <div className="flex w-full max-w-lg flex-col items-center justify-center gap-6 text-white">
       <h1 className="text-4xl font-bold">Tic Tac Toe</h1>
+      <div
+        className="grid w-full grid-cols-3 gap-3 rounded-lg bg-gray-800/60 p-4 text-center"
+        aria-live="polite"
+      >
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-sm font-semibold uppercase tracking-wide text-gray-300">X Wins</span>
+          <span className="text-2xl font-bold text-blue-400">{scores.x}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-sm font-semibold uppercase tracking-wide text-gray-300">O Wins</span>
+          <span className="text-2xl font-bold text-rose-400">{scores.o}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-sm font-semibold uppercase tracking-wide text-gray-300">Draws</span>
+          <span className="text-2xl font-bold text-amber-300">{scores.draws}</span>
+        </div>
+      </div>
       <p className="text-xl font-semibold" aria-live="polite">
         {statusMessage}
       </p>
