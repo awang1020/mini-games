@@ -8,6 +8,7 @@ interface ScoreBoardProps {
   currentBubbleColor: string;
   onRestart: () => void;
   isGameOver: boolean;
+  poppedCount: number;
 }
 
 const BubblePreview: FC<{ color: string; size?: number }> = ({ color, size = 44 }) => {
@@ -31,6 +32,7 @@ const ScoreBoard: FC<ScoreBoardProps> = ({
   currentBubbleColor,
   onRestart,
   isGameOver,
+  poppedCount,
 }) => {
   return (
     <aside className="w-full max-w-xs space-y-6 rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-xl backdrop-blur">
@@ -54,6 +56,10 @@ const ScoreBoard: FC<ScoreBoardProps> = ({
           <dd className="mt-1 text-lg font-semibold text-white">{remainingBubbles}</dd>
         </div>
         <div className="rounded-2xl bg-slate-800/70 p-4">
+          <dt className="text-xs uppercase tracking-wider text-slate-300">Popped</dt>
+          <dd className="mt-1 text-lg font-semibold text-white">{poppedCount}</dd>
+        </div>
+        <div className="col-span-2 rounded-2xl bg-slate-800/70 p-4">
           <dt className="text-xs uppercase tracking-wider text-slate-300">Status</dt>
           <dd className="mt-1 text-lg font-semibold text-white">{isGameOver ? 'Game Over' : 'In Play'}</dd>
         </div>
