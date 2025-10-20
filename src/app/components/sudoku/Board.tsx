@@ -46,6 +46,9 @@ const Board: FC<BoardProps> = ({
     const isMismatch = mismatches[rowIndex]?.[colIndex];
     const cellNotes = notes[rowIndex]?.[colIndex] ?? [];
     const isRecent = recentAction?.row === rowIndex && recentAction?.col === colIndex ? recentAction.type : null;
+    const subgridRow = Math.floor(rowIndex / SUBGRID_SIZE);
+    const subgridCol = Math.floor(colIndex / SUBGRID_SIZE);
+    const isEvenSubgrid = (subgridRow + subgridCol) % 2 === 0;
 
     const classes: string[] = [
       'relative flex aspect-square w-[58px] max-w-[72px] min-w-[44px] select-none items-center justify-center rounded-xl border text-2xl font-semibold transition-all duration-200 ease-out sm:w-16 md:w-20',
@@ -54,28 +57,37 @@ const Board: FC<BoardProps> = ({
     ];
 
     const getBorderClasses = () => {
-      const borders: string[] = ['border border-slate-700/60'];
+      const borders: string[] = ['border border-slate-700/40'];
       if (rowIndex % SUBGRID_SIZE === 0) {
-        borders.push('border-t-2 border-t-slate-500/60');
+        borders.push('border-t-[3px] border-t-slate-300/40');
+      }
+      if ((rowIndex + 1) % SUBGRID_SIZE === 0) {
+        borders.push('border-b-[3px] border-b-slate-300/40');
       }
       if (colIndex % SUBGRID_SIZE === 0) {
-        borders.push('border-l-2 border-l-slate-500/60');
+        borders.push('border-l-[3px] border-l-slate-300/40');
+      }
+      if ((colIndex + 1) % SUBGRID_SIZE === 0) {
+        borders.push('border-r-[3px] border-r-slate-300/40');
       }
       if (rowIndex === BOARD_SIZE - 1) {
-        borders.push('border-b-2 border-b-slate-500/60');
+        borders.push('border-b-[3px] border-b-slate-200/50');
       }
       if (colIndex === BOARD_SIZE - 1) {
-        borders.push('border-r-2 border-r-slate-500/60');
+        borders.push('border-r-[3px] border-r-slate-200/50');
       }
       return borders.join(' ');
     };
 
     classes.push(getBorderClasses());
 
+    classes.push(isEvenSubgrid ? 'bg-slate-950/80' : 'bg-slate-900/60');
+    classes.push('shadow-[inset_0_0_0_1px_rgba(148,163,184,0.08)]');
+
     if (isInitial) {
-      classes.push('bg-slate-950/80 text-slate-300');
+      classes.push('text-slate-200 font-bold');
     } else {
-      classes.push('bg-slate-900/70 text-slate-50 hover:bg-slate-800/80');
+      classes.push('text-slate-50 hover:bg-slate-800/70');
     }
 
     if (isRowHighlighted || isColumnHighlighted) {
