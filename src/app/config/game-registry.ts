@@ -1,5 +1,6 @@
 import type { GameConfig, GameId, GameMetadata } from '@/types/game';
 
+import ConnectFour from '../components/ConnectFour';
 import FlappyBird from '../components/FlappyBird';
 import Game2048 from '../components/Game2048';
 import Hangman from '../components/Hangman';
@@ -7,6 +8,7 @@ import MemoryGame from '../components/MemoryGame';
 import RockPaperScissors from '../components/RockPaperScissors';
 import Sudoku from '../components/Sudoku';
 import TicTacToe from '../components/TicTacToe';
+import ConnectFourIcon from '../components/icons/ConnectFourIcon';
 import FlappyBirdIcon from '../components/icons/FlappyBirdIcon';
 import Game2048Icon from '../components/icons/Game2048Icon';
 import HangmanIcon from '../components/icons/HangmanIcon';
@@ -31,6 +33,24 @@ export const gameRegistry: Record<GameId, GameConfig> = {
         'Players alternate placing their mark in an empty square.',
         'The first player to align three marks horizontally, vertically, or diagonally wins.',
         'If all squares are filled without a winner, the game ends in a draw.',
+      ],
+    },
+  },
+  'connect-four': {
+    metadata: {
+      id: 'connect-four',
+      title: 'Connect Four',
+      description: 'Drop tokens into a 7×6 grid and connect four in any direction.',
+      icon: ConnectFourIcon,
+    },
+    component: ConnectFour,
+    rules: {
+      title: 'Connect Four',
+      rules: [
+        'Players take turns dropping a token into one of seven columns. Tokens fall to the lowest available slot.',
+        'Connect four of your tokens horizontally, vertically, or diagonally to win the game.',
+        'If the board fills up with no winning connection, the game ends in a draw.',
+        'Use the undo button to revert the last move or restart to play a fresh match.',
       ],
     },
   },
