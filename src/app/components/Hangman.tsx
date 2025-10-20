@@ -66,6 +66,9 @@ const Hangman: FC = () => {
   const [normalizedWord, setNormalizedWord] = useState<string>('');
   const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
   const [incorrectGuesses, setIncorrectGuesses] = useState(0);
+  const [wins, setWins] = useState(0);
+  const [losses, setLosses] = useState(0);
+  const [hasRecordedResult, setHasRecordedResult] = useState(false);
 
   const startNewGame = useCallback(() => {
     const word = getRandomWord();
@@ -73,6 +76,7 @@ const Hangman: FC = () => {
     setNormalizedWord(normalizeText(word.toLowerCase()));
     setGuessedLetters([]);
     setIncorrectGuesses(0);
+    setHasRecordedResult(false);
   }, []);
 
   useEffect(() => {
@@ -111,6 +115,20 @@ const Hangman: FC = () => {
       .every((letter) => letter === '' || guessedLetters.includes(letter));
   }, [normalizedWord, guessedLetters]);
 
+  useEffect(() => {
+    if (hasRecordedResult) {
+      return;
+    }
+
+    if (isWinner) {
+      setWins((previousWins) => previousWins + 1);
+      setHasRecordedResult(true);
+    } else if (isGameOver) {
+      setLosses((previousLosses) => previousLosses + 1);
+      setHasRecordedResult(true);
+    }
+  }, [isWinner, isGameOver, hasRecordedResult]);
+
   const displayWord = useMemo(() => {
     if (!selectedWord) {
       return '';
@@ -133,6 +151,10 @@ const Hangman: FC = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Hangman</h1>
+      <div className={styles.scoreboard} aria-live="polite">
+        <span className={styles.score}>Wins: {wins}</span>
+        <span className={styles.score}>Losses: {losses}</span>
+      </div>
       <div className={styles.gameContainer}>
         <div className={styles.hangman} aria-hidden="true">
           <div className={styles.scaffold} />
