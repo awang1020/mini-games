@@ -89,23 +89,17 @@ const Hangman: FC = () => {
 
   const handleGuess = useCallback(
     (letter: string) => {
-      if (!selectedWord) {
+      if (!selectedWord || guessedLetters.includes(letter)) {
         return;
       }
 
-      setGuessedLetters((previousGuesses) => {
-        if (previousGuesses.includes(letter)) {
-          return previousGuesses;
-        }
+      if (!selectedWord.includes(letter)) {
+        setIncorrectGuesses((previous) => previous + 1);
+      }
 
-        if (!selectedWord.includes(letter)) {
-          setIncorrectGuesses((previous) => previous + 1);
-        }
-
-        return [...previousGuesses, letter];
-      });
+      setGuessedLetters((previousGuesses) => [...previousGuesses, letter]);
     },
-    [selectedWord],
+    [selectedWord, guessedLetters],
   );
 
   const isGameOver = incorrectGuesses >= MAX_ATTEMPTS;
