@@ -160,6 +160,12 @@ const ConnectFour = () => {
         return;
       }
 
+      let moveResult: {
+        move: Move;
+        winningCells: Array<[number, number]> | null;
+        boardFull: boolean;
+      } | null = null;
+
       setBoard((previousBoard) => {
         const targetRow = findAvailableRow(previousBoard, column);
         if (targetRow === null) {
@@ -177,23 +183,36 @@ const ConnectFour = () => {
         };
 
         const winningCells = detectWin(nextBoard, targetRow, column, currentPlayer);
+        const boardFull = nextBoard.every((row) => row.every((cell) => cell !== 0));
 
-        setMoveHistory((history) => [...history, nextMove]);
-        setLastMove(nextMove);
-
-        if (winningCells) {
-          setWinner({ player: currentPlayer, cells: winningCells });
-          setIsDraw(false);
-        } else {
-          const boardFull = nextBoard.every((row) => row.every((cell) => cell !== 0));
-          setIsDraw(boardFull);
-          if (!boardFull) {
-            setCurrentPlayer((player) => (player === 1 ? 2 : 1));
-          }
-        }
+        moveResult = {
+          move: nextMove,
+          winningCells,
+          boardFull,
+        };
 
         return nextBoard;
       });
+
+      if (!moveResult) {
+        return;
+      }
+
+      const { move, winningCells, boardFull } = moveResult;
+
+      setMoveHistory((history) => [...history, move]);
+      setLastMove(move);
+
+      if (winningCells) {
+        setWinner({ player: currentPlayer, cells: winningCells });
+        setIsDraw(false);
+        return;
+      }
+
+      setIsDraw(boardFull);
+      if (!boardFull) {
+        setCurrentPlayer((player) => (player === 1 ? 2 : 1));
+      }
     },
     [currentPlayer, isDraw, winner],
   );
