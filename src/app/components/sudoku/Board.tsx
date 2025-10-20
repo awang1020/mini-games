@@ -83,7 +83,9 @@ const Board: FC<BoardProps> = ({
     }
 
     if (shouldHighlightNumber) {
-      classes.push('bg-sky-900/60 text-sky-100 shadow-[0_0_12px_rgba(56,189,248,0.35)]');
+      classes.push(
+        'bg-sky-200/90 text-slate-900 ring-2 ring-sky-300/80 ring-offset-2 ring-offset-slate-950 shadow-[0_0_18px_rgba(56,189,248,0.65)] animate-highlight-pop'
+      );
     }
 
     if (isConflict) {
