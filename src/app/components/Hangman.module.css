@@ -16,6 +16,21 @@
   letter-spacing: 0.05em;
 }
 
+.scoreboard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.score {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background-color: #1f2937;
+}
+
 .newGameButton {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
