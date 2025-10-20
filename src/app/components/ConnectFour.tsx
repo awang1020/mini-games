@@ -22,6 +22,12 @@ interface WinnerState {
   cells: Array<[number, number]>;
 }
 
+interface Scoreboard {
+  player1: number;
+  player2: number;
+  draws: number;
+}
+
 const createEmptyBoard = (): Board =>
   Array.from({ length: ROW_COUNT }, () => Array<CellValue>(COLUMN_COUNT).fill(0));
 
@@ -114,6 +120,11 @@ const ConnectFour = () => {
   const [focusColumn, setFocusColumn] = useState(0);
   const [moveHistory, setMoveHistory] = useState<Move[]>([]);
   const [lastMove, setLastMove] = useState<Move | null>(null);
+  const [scoreboard, setScoreboard] = useState<Scoreboard>({
+    player1: 0,
+    player2: 0,
+    draws: 0,
+  });
 
   const instructionsId = useId();
 
@@ -186,10 +197,21 @@ const ConnectFour = () => {
       if (winningCells) {
         setWinner({ player, cells: winningCells });
         setIsDraw(false);
+        setScoreboard((scores) => ({
+          ...scores,
+          player1: scores.player1 + (player === 1 ? 1 : 0),
+          player2: scores.player2 + (player === 2 ? 1 : 0),
+        }));
         return;
       }
 
       setIsDraw(boardFull);
+      if (boardFull) {
+        setScoreboard((scores) => ({
+          ...scores,
+          draws: scores.draws + 1,
+        }));
+      }
       if (!boardFull) {
         setCurrentPlayer(player === 1 ? 2 : 1);
       }
@@ -212,6 +234,10 @@ const ConnectFour = () => {
   const handleRestart = useCallback(() => {
     resetGame();
   }, [resetGame]);
+
+  const handleResetScoreboard = useCallback(() => {
+    setScoreboard({ player1: 0, player2: 0, draws: 0 });
+  }, []);
 
   const handleUndo = useCallback(() => {
     setMoveHistory((history) => {
@@ -260,7 +286,7 @@ const ConnectFour = () => {
     [focusColumn, handleDrop, highlightedColumn],
   );
 
-  const canUndo = moveHistory.length > 0;
+  const canUndo = moveHistory.length > 0 && !winner && !isDraw;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 text-white">
@@ -303,6 +329,33 @@ const ConnectFour = () => {
         <p className={`text-lg font-semibold ${statusColorClass}`}>
           {statusMessage}
         </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+        <div className="rounded-lg border border-gray-700 bg-gray-900/80 p-4 shadow-lg">
+          <h2 className="text-xl font-semibold text-amber-300">Scoreboard</h2>
+          <dl className="mt-3 grid grid-cols-1 gap-3 text-sm text-gray-200 sm:grid-cols-3">
+            <div className="rounded-md bg-gray-800/70 p-3 text-center">
+              <dt className="text-xs uppercase tracking-wide text-gray-400">Player 1</dt>
+              <dd className="mt-1 text-2xl font-bold text-red-400">{scoreboard.player1}</dd>
+            </div>
+            <div className="rounded-md bg-gray-800/70 p-3 text-center">
+              <dt className="text-xs uppercase tracking-wide text-gray-400">Player 2</dt>
+              <dd className="mt-1 text-2xl font-bold text-yellow-300">{scoreboard.player2}</dd>
+            </div>
+            <div className="rounded-md bg-gray-800/70 p-3 text-center">
+              <dt className="text-xs uppercase tracking-wide text-gray-400">Draws</dt>
+              <dd className="mt-1 text-2xl font-bold text-gray-200">{scoreboard.draws}</dd>
+            </div>
+          </dl>
+        </div>
+        <button
+          type="button"
+          onClick={handleResetScoreboard}
+          className="h-fit rounded-md border border-gray-600 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+        >
+          Reset Scoreboard
+        </button>
       </div>
 
       <div className="relative mx-auto w-full max-w-3xl">
