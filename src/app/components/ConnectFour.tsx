@@ -160,6 +160,8 @@ const ConnectFour = () => {
         return;
       }
 
+      const player = currentPlayer;
+
       let moveResult: {
         move: Move;
         winningCells: Array<[number, number]> | null;
@@ -173,16 +175,16 @@ const ConnectFour = () => {
         }
 
         const nextBoard = previousBoard.map((row) => [...row]);
-        nextBoard[targetRow][column] = currentPlayer;
+        nextBoard[targetRow][column] = player;
 
         const nextMove: Move = {
           row: targetRow,
           column,
-          player: currentPlayer,
+          player,
           id: Date.now(),
         };
 
-        const winningCells = detectWin(nextBoard, targetRow, column, currentPlayer);
+        const winningCells = detectWin(nextBoard, targetRow, column, player);
         const boardFull = nextBoard.every((row) => row.every((cell) => cell !== 0));
 
         moveResult = {
@@ -204,20 +206,20 @@ const ConnectFour = () => {
       setLastMove(move);
 
       if (winningCells) {
-        setWinner({ player: currentPlayer, cells: winningCells });
+        setWinner({ player, cells: winningCells });
         setIsDraw(false);
         return;
       }
 
       setIsDraw(boardFull);
       if (!boardFull) {
-        setCurrentPlayer((player) => (player === 1 ? 2 : 1));
+        setCurrentPlayer(player === 1 ? 2 : 1);
       }
     },
     [currentPlayer, isDraw, winner],
   );
 
-  const handleRestart = useCallback(() => {
+  const resetGame = useCallback(() => {
     setBoard(createEmptyBoard());
     setCurrentPlayer(1);
     setWinner(null);
@@ -228,6 +230,10 @@ const ConnectFour = () => {
     setMoveHistory([]);
     setLastMove(null);
   }, []);
+
+  const handleRestart = useCallback(() => {
+    resetGame();
+  }, [resetGame]);
 
   const handleUndo = useCallback(() => {
     setMoveHistory((history) => {
