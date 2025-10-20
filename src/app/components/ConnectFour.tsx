@@ -161,47 +161,25 @@ const ConnectFour = () => {
       }
 
       const player = currentPlayer;
-
-      let moveResult: {
-        move: Move;
-        winningCells: Array<[number, number]> | null;
-        boardFull: boolean;
-      } | null = null;
-
-      setBoard((previousBoard) => {
-        const targetRow = findAvailableRow(previousBoard, column);
-        if (targetRow === null) {
-          return previousBoard;
-        }
-
-        const nextBoard = previousBoard.map((row) => [...row]);
-        nextBoard[targetRow][column] = player;
-
-        const nextMove: Move = {
-          row: targetRow,
-          column,
-          player,
-          id: Date.now(),
-        };
-
-        const winningCells = detectWin(nextBoard, targetRow, column, player);
-        const boardFull = nextBoard.every((row) => row.every((cell) => cell !== 0));
-
-        moveResult = {
-          move: nextMove,
-          winningCells,
-          boardFull,
-        };
-
-        return nextBoard;
-      });
-
-      if (!moveResult) {
+      const targetRow = findAvailableRow(board, column);
+      if (targetRow === null) {
         return;
       }
 
-      const { move, winningCells, boardFull } = moveResult;
+      const nextBoard = board.map((row) => [...row]);
+      nextBoard[targetRow][column] = player;
 
+      const move: Move = {
+        row: targetRow,
+        column,
+        player,
+        id: Date.now(),
+      };
+
+      const winningCells = detectWin(nextBoard, targetRow, column, player);
+      const boardFull = nextBoard.every((row) => row.every((cell) => cell !== 0));
+
+      setBoard(nextBoard);
       setMoveHistory((history) => [...history, move]);
       setLastMove(move);
 
@@ -216,7 +194,7 @@ const ConnectFour = () => {
         setCurrentPlayer(player === 1 ? 2 : 1);
       }
     },
-    [currentPlayer, isDraw, winner],
+    [board, currentPlayer, isDraw, winner],
   );
 
   const resetGame = useCallback(() => {
