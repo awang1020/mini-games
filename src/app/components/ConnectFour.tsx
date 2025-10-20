@@ -111,7 +111,7 @@ const detectWin = (
 };
 
 const controlButtonBase =
-  'inline-flex h-11 min-w-[9rem] items-center justify-center rounded-md border px-4 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:w-auto sm:flex-1 lg:flex-none';
+  'inline-flex h-11 w-full max-w-[16rem] items-center justify-center rounded-md border px-4 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900';
 
 const ConnectFour = () => {
   const [board, setBoard] = useState<Board>(() => createEmptyBoard());
@@ -421,7 +421,7 @@ const ConnectFour = () => {
               <p className="text-sm text-gray-400">Track wins, losses, and draws at a glance.</p>
             </div>
             <div className="flex w-full flex-col items-center gap-2">
-              <div className="flex w-full flex-col items-center gap-2 sm:flex-row sm:items-stretch sm:justify-center">
+              <div className="flex w-full flex-col items-center gap-2">
                 <button
                   type="button"
                   onClick={handleRestart}
