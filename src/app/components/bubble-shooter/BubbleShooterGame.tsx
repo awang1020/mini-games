@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useRouter } from 'next/navigation';
 
 import GameBoard from './GameBoard';
 import ScoreBoard from './ScoreBoard';
@@ -272,6 +273,9 @@ const BubbleShooterGame = () => {
   const [currentBubbleColor, setCurrentBubbleColor] = useState(randomColor);
   const [nextBubbleColor, setNextBubbleColor] = useState(randomColor);
   const [scale, setScale] = useState(1);
+  const [poppedCount, setPoppedCount] = useState(0);
+
+  const router = useRouter();
 
   const boardRef = useRef<HTMLDivElement>(null);
   const boardWrapperRef = useRef<HTMLDivElement>(null);
@@ -352,6 +356,7 @@ const BubbleShooterGame = () => {
           setScore((currentScore) => currentScore + popped * 10);
           const updatedTotal = poppedRef.current + popped;
           poppedRef.current = updatedTotal;
+          setPoppedCount(updatedTotal);
           const nextLevel = Math.max(1, 1 + Math.floor(updatedTotal / 20));
           setLevel((currentLevel) => (nextLevel > currentLevel ? nextLevel : currentLevel));
         }
@@ -598,6 +603,7 @@ const BubbleShooterGame = () => {
     setGameOver(false);
     gameOverRef.current = false;
     poppedRef.current = 0;
+    setPoppedCount(0);
     lastRowDropRef.current = performance.now();
     lastFrameRef.current = null;
     setActiveBubble(null);
@@ -613,6 +619,10 @@ const BubbleShooterGame = () => {
   }, []);
 
   const remainingBubbles = useMemo(() => countBubbles(board), [board]);
+
+  const handleBackToMenu = useCallback(() => {
+    router.push('/');
+  }, [router]);
 
   return (
     <div className="flex w-full flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
@@ -632,6 +642,10 @@ const BubbleShooterGame = () => {
         getBubblePosition={getBubblePosition}
         gameOver={gameOver}
         onRestart={restartGame}
+        score={score}
+        level={level}
+        poppedCount={poppedCount}
+        onBackToMenu={handleBackToMenu}
       />
       <ScoreBoard
         score={score}
@@ -641,6 +655,7 @@ const BubbleShooterGame = () => {
         currentBubbleColor={currentBubbleColor}
         onRestart={restartGame}
         isGameOver={gameOver}
+        poppedCount={poppedCount}
       />
     </div>
   );
