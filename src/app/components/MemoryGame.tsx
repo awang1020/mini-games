@@ -121,17 +121,29 @@ const MemoryGame: FC = () => {
         return previousFlipped;
       }
 
-      setBoard((previousBoard) =>
-        previousBoard.map((card) =>
+      let shouldFlipCard = false;
+
+      setBoard((previousBoard) => {
+        const cardToFlip = previousBoard.find((card) => card.id === id);
+
+        if (!cardToFlip || cardToFlip.isMatched || cardToFlip.isFlipped) {
+          return previousBoard;
+        }
+
+        shouldFlipCard = true;
+
+        return previousBoard.map((card) =>
           card.id === id ? { ...card, isFlipped: true } : card,
-        ),
-      );
+        );
+      });
+
+      if (!shouldFlipCard) {
+        return previousFlipped;
+      }
 
       const nextFlipped = [...previousFlipped, id];
 
-      if (nextFlipped.length === 2) {
-        setMoves((previousMoves) => previousMoves + 1);
-      }
+      setMoves((previousMoves) => previousMoves + 1);
 
       return nextFlipped;
     });
