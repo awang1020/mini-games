@@ -1,12 +1,26 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface HighScores {
   easy: number[];
   medium: number[];
   hard: number[];
 }
+
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const remainder = (seconds % 60).toString().padStart(2, '0');
+  return `${minutes}:${remainder}`;
+};
+
+const difficultyMeta: { key: keyof HighScores; label: string; accent: string }[] = [
+  { key: 'easy', label: 'Easy', accent: 'text-emerald-300' },
+  { key: 'medium', label: 'Medium', accent: 'text-amber-300' },
+  { key: 'hard', label: 'Hard', accent: 'text-rose-300' },
+];
 
 const HighScoreBoard = ({ onClose }: { onClose: () => void }) => {
   const [highScores, setHighScores] = useState<HighScores>({ easy: [], medium: [], hard: [] });
@@ -18,38 +32,61 @@ const HighScoreBoard = ({ onClose }: { onClose: () => void }) => {
     }
   }, []);
 
+  const hasAnyScore = difficultyMeta.some(({ key }) => highScores[key]?.length);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-2xl text-white w-full max-w-md mx-auto">
-        <h2 className="text-4xl font-bold mb-6 text-center">High Scores</h2>
-        <div className="flex justify-around mb-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sudoku-highscores-title"
+        className="w-full max-w-2xl rounded-3xl border border-slate-800/70 bg-slate-950/90 p-8 text-slate-100 shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-2xl font-semibold mb-2 text-blue-400">Easy</h3>
-            <ol className="list-decimal list-inside text-lg">
-              {highScores.easy.slice(0, 5).map((score, i) => <li key={i}>{score}s</li>)}
-            </ol>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-400">Leaderboard</p>
+            <h2 id="sudoku-highscores-title" className="mt-2 text-3xl font-bold tracking-tight">
+              Fastest completion times
+            </h2>
+            <p className="mt-2 text-sm text-slate-300">Keep errors low and finish quickly to etch your score onto the board.</p>
           </div>
-          <div>
-            <h3 className="text-2xl font-semibold mb-2 text-yellow-400">Medium</h3>
-            <ol className="list-decimal list-inside text-lg">
-              {highScores.medium.slice(0, 5).map((score, i) => <li key={i}>{score}s</li>)}
-            </ol>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold mb-2 text-red-400">Hard</h3>
-            <ol className="list-decimal list-inside text-lg">
-              {highScores.hard.slice(0, 5).map((score, i) => <li key={i}>{score}s</li>)}
-            </ol>
-          </div>
-        </div>
-        <div className="text-center">
           <button
+            type="button"
             onClick={onClose}
-            className="px-6 py-2 bg-blue-600 rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200"
+            className="rounded-full bg-slate-800/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-300 transition hover:bg-slate-700/80"
           >
             Close
           </button>
         </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {difficultyMeta.map(({ key, label, accent }) => {
+            const scores = highScores[key]?.slice(0, 5) ?? [];
+            return (
+              <div key={key} className="rounded-2xl bg-slate-900/70 p-4 shadow-inner">
+                <h3 className={`text-sm font-semibold uppercase tracking-wide ${accent}`}>{label}</h3>
+                {scores.length > 0 ? (
+                  <ol className="mt-3 space-y-2 text-sm text-slate-200">
+                    {scores.map((score, index) => (
+                      <li key={index} className="flex items-center justify-between rounded-xl bg-slate-900/80 px-3 py-2">
+                        <span className="font-semibold text-slate-300">#{index + 1}</span>
+                        <span className="text-lg font-bold text-slate-100">{formatTime(score)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="mt-3 text-sm text-slate-500">No scores yet—be the first!</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {!hasAnyScore && (
+          <p className="mt-6 rounded-2xl bg-slate-900/70 p-4 text-center text-sm text-slate-300">
+            Your best times will appear here after you finish a game without mistakes.
+          </p>
+        )}
       </div>
     </div>
   );
