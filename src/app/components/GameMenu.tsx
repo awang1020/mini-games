@@ -19,15 +19,15 @@ const GameMenu: FC<GameMenuProps> = ({ games, onSelectGame }) => {
             Choose a game to play and challenge yourself or your friends.
           </p>
         </header>
-        <ul className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid items-stretch gap-8 sm:grid-cols-2 xl:grid-cols-3">
           {games.map((game) => {
             const Icon = game.icon;
             return (
-              <li key={game.id}>
+              <li key={game.id} className="flex">
                 <button
                   type="button"
                   onClick={() => onSelectGame(game.id)}
-                  className="flex w-full flex-col items-center gap-4 rounded-2xl bg-gray-800 p-8 text-center shadow-lg transition-colors transition-transform duration-200 hover:-translate-y-1 hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+                  className="flex h-full w-full flex-col items-center gap-4 rounded-2xl bg-gray-800 p-8 text-center shadow-lg transition-colors transition-transform duration-200 hover:-translate-y-1 hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
                 >
                   <Icon className="mx-auto h-16 w-16 text-indigo-300" />
                   <div>
