@@ -311,13 +311,6 @@ const ConnectFour = () => {
           >
             Undo
           </button>
-          <button
-            type="button"
-            onClick={handleRestart}
-            className="rounded-md border border-gray-600 bg-amber-500 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
-          >
-            Restart
-          </button>
         </div>
       </div>
 
@@ -331,31 +324,43 @@ const ConnectFour = () => {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
-        <div className="rounded-lg border border-gray-700 bg-gray-900/80 p-4 shadow-lg">
-          <h2 className="text-xl font-semibold text-amber-300">Scoreboard</h2>
-          <dl className="mt-3 grid grid-cols-1 gap-3 text-sm text-gray-200 sm:grid-cols-3">
-            <div className="rounded-md bg-gray-800/70 p-3 text-center">
-              <dt className="text-xs uppercase tracking-wide text-gray-400">Player 1</dt>
-              <dd className="mt-1 text-2xl font-bold text-red-400">{scoreboard.player1}</dd>
-            </div>
-            <div className="rounded-md bg-gray-800/70 p-3 text-center">
-              <dt className="text-xs uppercase tracking-wide text-gray-400">Player 2</dt>
-              <dd className="mt-1 text-2xl font-bold text-yellow-300">{scoreboard.player2}</dd>
-            </div>
-            <div className="rounded-md bg-gray-800/70 p-3 text-center">
-              <dt className="text-xs uppercase tracking-wide text-gray-400">Draws</dt>
-              <dd className="mt-1 text-2xl font-bold text-gray-200">{scoreboard.draws}</dd>
-            </div>
-          </dl>
+      <div className="rounded-lg border border-gray-700 bg-gray-900/80 p-4 shadow-lg">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-amber-300">Scoreboard</h2>
+            <p className="text-sm text-gray-400">Track wins, losses, and draws at a glance.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handleRestart}
+              className="rounded-md border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+            >
+              Restart
+            </button>
+            <button
+              type="button"
+              onClick={handleResetScoreboard}
+              className="rounded-md border border-gray-600 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+            >
+              Reset Scoreboard
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={handleResetScoreboard}
-          className="h-fit rounded-md border border-gray-600 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
-        >
-          Reset Scoreboard
-        </button>
+        <dl className="mt-4 grid grid-cols-1 gap-3 text-sm text-gray-200 sm:grid-cols-3">
+          <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
+            <dt className="text-xs uppercase tracking-wide text-gray-400">Player 1</dt>
+            <dd className="mt-1 text-2xl font-bold text-red-400">{scoreboard.player1}</dd>
+          </div>
+          <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
+            <dt className="text-xs uppercase tracking-wide text-gray-400">Player 2</dt>
+            <dd className="mt-1 text-2xl font-bold text-yellow-300">{scoreboard.player2}</dd>
+          </div>
+          <div className="rounded-md border border-gray-700 bg-gray-800/70 p-3 text-center shadow-inner">
+            <dt className="text-xs uppercase tracking-wide text-gray-400">Draws</dt>
+            <dd className="mt-1 text-2xl font-bold text-gray-200">{scoreboard.draws}</dd>
+          </div>
+        </dl>
       </div>
 
       <div className="relative mx-auto w-full max-w-3xl">
