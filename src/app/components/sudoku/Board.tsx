@@ -8,6 +8,7 @@ interface BoardProps {
   board: number[][];
   initialBoard: number[][];
   selectedCell: CellPosition | null;
+  highlightedNumber: number | null;
   conflicts: boolean[][];
   mismatches: boolean[][];
   notes: number[][][];
@@ -22,6 +23,7 @@ const Board: FC<BoardProps> = ({
   board,
   initialBoard,
   selectedCell,
+  highlightedNumber,
   conflicts,
   mismatches,
   notes,
@@ -35,14 +37,18 @@ const Board: FC<BoardProps> = ({
     const isRowHighlighted = selectedCell?.row === rowIndex;
     const isColumnHighlighted = selectedCell?.col === colIndex;
     const selectedValue = selectedCell ? board[selectedCell.row]?.[selectedCell.col] : 0;
-    const isSameValue = selectedValue !== 0 && selectedValue === cellValue;
+    const highlightMatchesActiveNumber =
+      highlightedNumber !== null && highlightedNumber === cellValue && cellValue !== 0;
+    const highlightMatchesSelection =
+      highlightedNumber === null && selectedValue !== 0 && selectedValue === cellValue;
+    const shouldHighlightNumber = highlightMatchesActiveNumber || highlightMatchesSelection;
     const isConflict = conflicts[rowIndex]?.[colIndex];
     const isMismatch = mismatches[rowIndex]?.[colIndex];
     const cellNotes = notes[rowIndex]?.[colIndex] ?? [];
     const isRecent = recentAction?.row === rowIndex && recentAction?.col === colIndex ? recentAction.type : null;
 
     const classes: string[] = [
-      'relative flex aspect-square w-[58px] max-w-[72px] min-w-[44px] select-none items-center justify-center rounded-xl border text-2xl font-semibold transition-all duration-150 sm:w-16 md:w-20',
+      'relative flex aspect-square w-[58px] max-w-[72px] min-w-[44px] select-none items-center justify-center rounded-xl border text-2xl font-semibold transition-all duration-200 ease-out sm:w-16 md:w-20',
       'cursor-pointer',
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
     ];
@@ -76,8 +82,8 @@ const Board: FC<BoardProps> = ({
       classes.push('bg-slate-900/60');
     }
 
-    if (isSameValue && !isSelected) {
-      classes.push('bg-sky-900/50 text-sky-200');
+    if (shouldHighlightNumber) {
+      classes.push('bg-sky-900/60 text-sky-100 shadow-[0_0_12px_rgba(56,189,248,0.35)]');
     }
 
     if (isConflict) {

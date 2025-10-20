@@ -17,6 +17,7 @@ interface ControlsProps {
   hintsRemaining: number;
   canUndo: boolean;
   canRedo: boolean;
+  selectedNumber: number | null;
 }
 
 const Controls: FC<ControlsProps> = ({
@@ -34,6 +35,7 @@ const Controls: FC<ControlsProps> = ({
   hintsRemaining,
   canUndo,
   canRedo,
+  selectedNumber,
 }) => {
   const numbers = Array.from({ length: 9 }, (_, index) => index + 1);
 
@@ -50,10 +52,15 @@ const Controls: FC<ControlsProps> = ({
                 type="button"
                 onClick={() => onNumberClick(num)}
                 disabled={numberPadDisabled}
+                aria-pressed={selectedNumber === num}
                 className={`flex h-16 items-center justify-center rounded-2xl text-2xl font-semibold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 ${
                   numberPadDisabled
                     ? 'cursor-not-allowed bg-slate-800/60 text-slate-500'
                     : 'bg-slate-800/90 text-slate-100 shadow hover:-translate-y-0.5 hover:bg-slate-700/90 hover:shadow-lg'
+                } ${
+                  selectedNumber === num
+                    ? 'ring-2 ring-sky-300/80 bg-sky-900/50 text-sky-100 shadow-lg shadow-sky-500/30'
+                    : ''
                 }`}
                 aria-label={`Insert number ${num}`}
               >
