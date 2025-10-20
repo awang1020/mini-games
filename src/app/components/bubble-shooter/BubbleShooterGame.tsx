@@ -467,6 +467,19 @@ const BubbleShooterGame = () => {
       return trimmed;
     });
 
+    if (!triggeredGameOver) {
+      const bubble = activeBubbleRef.current;
+      if (bubble) {
+        const radius = BUBBLE_SIZE / 2;
+        const adjustedBubble: ActiveBubble = {
+          ...bubble,
+          y: Math.max(radius, bubble.y - ROW_HEIGHT),
+        };
+        activeBubbleRef.current = adjustedBubble;
+        setActiveBubble(adjustedBubble);
+      }
+    }
+
     if (triggeredGameOver) {
       triggerGameOver();
     }
