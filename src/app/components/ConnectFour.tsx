@@ -110,6 +110,9 @@ const detectWin = (
   return null;
 };
 
+const controlButtonBase =
+  'inline-flex h-11 min-w-[9rem] items-center justify-center rounded-md border px-4 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:w-auto sm:flex-1 lg:flex-none';
+
 const ConnectFour = () => {
   const [board, setBoard] = useState<Board>(() => createEmptyBoard());
   const [currentPlayer, setCurrentPlayer] = useState<Player>(1);
@@ -418,11 +421,11 @@ const ConnectFour = () => {
               <p className="text-sm text-gray-400">Track wins, losses, and draws at a glance.</p>
             </div>
             <div className="flex w-full flex-col items-center gap-2">
-              <div className="flex w-full flex-col items-center gap-2 sm:flex-row sm:justify-center">
+              <div className="flex w-full flex-col items-center gap-2 sm:flex-row sm:items-stretch sm:justify-center">
                 <button
                   type="button"
                   onClick={handleRestart}
-                  className="w-full min-w-[8rem] rounded-md border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:w-auto sm:flex-1 lg:flex-none"
+                  className={`${controlButtonBase} border-amber-500 bg-amber-500 text-gray-900 hover:bg-amber-400`}
                 >
                   Restart
                 </button>
@@ -430,7 +433,7 @@ const ConnectFour = () => {
                   type="button"
                   onClick={handleUndo}
                   disabled={!canUndo}
-                  className={`w-full min-w-[8rem] rounded-md border border-gray-600 px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:w-auto sm:flex-1 lg:flex-none ${
+                  className={`${controlButtonBase} border-gray-600 ${
                     canUndo
                       ? 'bg-gray-800 text-white hover:bg-gray-700'
                       : 'cursor-not-allowed bg-gray-800/50 text-gray-500'
