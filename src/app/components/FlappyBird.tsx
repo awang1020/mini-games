@@ -49,7 +49,7 @@ const FlappyBird = () => {
   const [gameState, setGameState] = useState<GameState>(() => ({
     birdY: GAME_HEIGHT / 2 - BIRD_SIZE / 2,
     birdVelocity: 0,
-    pipes: [createPipe(pipeIdRef.current++, 240)],
+    pipes: [createPipe(pipeIdRef.current++, PIPE_SPACING)],
     score: 0,
   }));
 
@@ -67,7 +67,7 @@ const FlappyBird = () => {
     const initialState: GameState = {
       birdY: GAME_HEIGHT / 2 - BIRD_SIZE / 2,
       birdVelocity: 0,
-      pipes: [createPipe(pipeIdRef.current++, 240)],
+      pipes: [createPipe(pipeIdRef.current++, PIPE_SPACING)],
       score: 0,
     };
     gameStateRef.current = initialState;
@@ -182,9 +182,22 @@ const FlappyBird = () => {
       });
 
       spawnTimerRef.current += delta;
-      if (spawnTimerRef.current >= PIPE_INTERVAL) {
+      while (spawnTimerRef.current >= PIPE_INTERVAL) {
         spawnTimerRef.current -= PIPE_INTERVAL;
-        updatedPipes.push(createPipe(pipeIdRef.current++));
+
+        const rightmostPipeX = updatedPipes.reduce<number | null>((max, pipe) => {
+          if (max === null || pipe.x > max) {
+            return pipe.x;
+          }
+          return max;
+        }, null);
+
+        const spawnOffset =
+          rightmostPipeX === null
+            ? PIPE_SPACING
+            : Math.max(PIPE_SPACING, rightmostPipeX + PIPE_SPACING - GAME_WIDTH);
+
+        updatedPipes.push(createPipe(pipeIdRef.current++, spawnOffset));
       }
 
       const nextState: GameState = {
