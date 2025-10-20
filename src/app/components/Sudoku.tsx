@@ -4,6 +4,13 @@ import type { FC, KeyboardEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { generateSudoku } from '../../lib/sudoku';
+import {
+  PLAYER_NAME_STORAGE_KEY,
+  addScoreToScoreboard,
+  loadScoreboard,
+  persistScoreboard,
+} from '../../lib/sudokuScoreboard';
+import type { Difficulty } from '../../types/sudoku';
 import Board from './sudoku/Board';
 import Controls from './sudoku/Controls';
 import HighScoreBoard from './sudoku/HighScoreBoard';
@@ -15,8 +22,6 @@ const SUBGRID_SIZE = 3;
 const MAX_HINTS = 3;
 const HISTORY_LIMIT = 50;
 const DEFAULT_DIFFICULTY: Difficulty = 'easy';
-
-type Difficulty = 'easy' | 'medium' | 'hard';
 
 type CellPosition = { row: number; col: number };
 
@@ -119,6 +124,7 @@ const Sudoku: FC = () => {
     col: number;
     type: 'correct' | 'incorrect' | 'hint' | 'clear';
   } | null>(null);
+  const [recentScoreId, setRecentScoreId] = useState<string | null>(null);
 
   const hintsRemaining = Math.max(0, MAX_HINTS - hintCount);
   const hasBoard = board.length > 0;
@@ -172,16 +178,6 @@ const Sudoku: FC = () => {
     });
     setRedoStack([]);
   }, [getSnapshot, hasBoard]);
-
-  const updateHighScores = useCallback((newScore: number, level: Difficulty) => {
-    const savedScores = localStorage.getItem('sudokuHighScores');
-    const highScores = savedScores ? JSON.parse(savedScores) : { easy: [], medium: [], hard: [] };
-    const scores: number[] = highScores[level] ?? [];
-    scores.push(newScore);
-    scores.sort((a, b) => a - b);
-    highScores[level] = scores.slice(0, 5);
-    localStorage.setItem('sudokuHighScores', JSON.stringify(highScores));
-  }, []);
 
   const newGame = useCallback((level?: Difficulty) => {
     initializeGame(level ?? difficulty);
@@ -283,10 +279,9 @@ const Sudoku: FC = () => {
       setIsRunning(false);
       setIsWon(true);
       setSelectedCell(null);
-      updateHighScores(time, difficulty);
       localStorage.removeItem('sudokuGame');
     }
-  }, [board, difficulty, hasBoard, isWon, time, updateHighScores]);
+  }, [board, difficulty, hasBoard, isWon, time]);
 
   useEffect(() => {
     if (!lastAction) {
@@ -589,6 +584,35 @@ const Sudoku: FC = () => {
     return `${minutes}:${seconds}`;
   }, [time]);
 
+  const handleScoreSubmit = useCallback(
+    (playerName: string) => {
+      const scoreboard = loadScoreboard();
+      const result = addScoreToScoreboard(scoreboard, difficulty, {
+        player: playerName,
+        time,
+        errors: errorCount,
+        hintsUsed: hintCount,
+      });
+
+      persistScoreboard(result.scoreboard);
+      localStorage.setItem(PLAYER_NAME_STORAGE_KEY, playerName);
+      setRecentScoreId(result.entry?.id ?? null);
+
+      return result;
+    },
+    [difficulty, errorCount, hintCount, time],
+  );
+
+  const handleViewScoreboard = useCallback(() => {
+    setShowHighScores(true);
+    setIsWon(false);
+  }, []);
+
+  const handleCloseHighScores = useCallback(() => {
+    setShowHighScores(false);
+    setRecentScoreId(null);
+  }, []);
+
   return (
     <div
       className="relative flex w-full max-w-6xl flex-1 flex-col items-center gap-6 rounded-3xl bg-gradient-to-br from-slate-950/80 via-slate-900/80 to-slate-950/60 p-6 text-slate-100 shadow-2xl backdrop-blur"
@@ -679,8 +703,20 @@ const Sudoku: FC = () => {
         />
       </div>
 
-      {isWon && <WinModal time={formattedTime} onNewGame={() => newGame(difficulty)} />}
-      {showHighScores && <HighScoreBoard onClose={() => setShowHighScores(false)} />}
+      {isWon && (
+        <WinModal
+          difficulty={difficulty}
+          errors={errorCount}
+          hintsUsed={hintCount}
+          onNewGame={() => newGame(difficulty)}
+          onSubmitScore={handleScoreSubmit}
+          onViewScoreboard={handleViewScoreboard}
+          time={formattedTime}
+        />
+      )}
+      {showHighScores && (
+        <HighScoreBoard highlightScoreId={recentScoreId} onClose={handleCloseHighScores} />
+      )}
       {showTutorial && <TutorialModal onClose={() => {
         setShowTutorial(false);
         localStorage.setItem('sudokuTutorialSeen', 'true');
