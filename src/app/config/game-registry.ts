@@ -8,6 +8,7 @@ import MemoryGame from '../components/MemoryGame';
 import RockPaperScissors from '../components/RockPaperScissors';
 import Sudoku from '../components/Sudoku';
 import TicTacToe from '../components/TicTacToe';
+import Tetris from '../components/Tetris';
 import ConnectFourIcon from '../components/icons/ConnectFourIcon';
 import FlappyBirdIcon from '../components/icons/FlappyBirdIcon';
 import Game2048Icon from '../components/icons/Game2048Icon';
@@ -16,6 +17,7 @@ import MemoryGameIcon from '../components/icons/MemoryGameIcon';
 import RockPaperScissorsIcon from '../components/icons/RockPaperScissorsIcon';
 import SudokuIcon from '../components/icons/SudokuIcon';
 import TicTacToeIcon from '../components/icons/TicTacToeIcon';
+import TetrisIcon from '../components/icons/TetrisIcon';
 
 export const gameRegistry: Record<GameId, GameConfig> = {
   'tic-tac-toe': {
@@ -102,6 +104,23 @@ export const gameRegistry: Record<GameId, GameConfig> = {
         'Use the arrow keys or on-screen controls to slide all tiles in a direction.',
         'Tiles with matching numbers merge into one and increase your score.',
         'Create a tile with the number 2048 to win. No moves left? The game ends.',
+      ],
+    },
+  },
+  tetris: {
+    metadata: {
+      id: 'tetris',
+      title: 'Tetris',
+      description: 'Stack and clear lines with classic tetrominoes.',
+      icon: TetrisIcon,
+    },
+    component: Tetris,
+    rules: {
+      title: 'Tetris',
+      rules: [
+        'Move and rotate falling pieces to complete full horizontal lines.',
+        'Clearing multiple lines at once yields higher scores.',
+        'Speed increases with level; the game ends when pieces reach the top.',
       ],
     },
   },
