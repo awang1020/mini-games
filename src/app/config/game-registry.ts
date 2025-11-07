@@ -3,7 +3,6 @@ import type { GameConfig, GameId, GameMetadata } from '@/types/game';
 import ConnectFour from '../components/ConnectFour';
 import FlappyBird from '../components/FlappyBird';
 import Game2048 from '../components/Game2048';
-import BubbleShooterGame from '../components/bubble-shooter/BubbleShooterGame';
 import Hangman from '../components/Hangman';
 import MemoryGame from '../components/MemoryGame';
 import RockPaperScissors from '../components/RockPaperScissors';
@@ -12,7 +11,6 @@ import TicTacToe from '../components/TicTacToe';
 import ConnectFourIcon from '../components/icons/ConnectFourIcon';
 import FlappyBirdIcon from '../components/icons/FlappyBirdIcon';
 import Game2048Icon from '../components/icons/Game2048Icon';
-import BubbleShooterIcon from '../components/icons/BubbleShooterIcon';
 import HangmanIcon from '../components/icons/HangmanIcon';
 import MemoryGameIcon from '../components/icons/MemoryGameIcon';
 import RockPaperScissorsIcon from '../components/icons/RockPaperScissorsIcon';
@@ -155,24 +153,6 @@ export const gameRegistry: Record<GameId, GameConfig> = {
         'Tap, click, or press Space to make the bird flap upward.',
         'Navigate through the gaps between the pipes—touching them ends the run.',
         'Each pair of pipes you pass earns one point. Try to beat your best score!',
-      ],
-    },
-  },
-  'bubble-shooter': {
-    metadata: {
-      id: 'bubble-shooter',
-      title: 'Bubble Shooter',
-      description: 'Match and pop clusters before the bubbles reach the bottom.',
-      icon: BubbleShooterIcon,
-    },
-    component: BubbleShooterGame,
-    rules: {
-      title: 'Bubble Shooter',
-      rules: [
-        'Aim the cannon with your mouse or arrow keys and fire with a click or the space bar.',
-        'Match three or more bubbles of the same color to pop them and earn points.',
-        'Disconnected bubbles fall after matches—keep clearing clusters to stay alive.',
-        'New rows descend over time. If any bubble crosses the bottom line, the game ends.',
       ],
     },
   },

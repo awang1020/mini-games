@@ -3,14 +3,14 @@
 import type { FC, KeyboardEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { generateSudoku } from '../../lib/sudoku';
+import { generateSudoku } from '@/lib/sudoku';
 import {
   PLAYER_NAME_STORAGE_KEY,
   addScoreToScoreboard,
   loadScoreboard,
   persistScoreboard,
-} from '../../lib/sudokuScoreboard';
-import type { Difficulty } from '../../types/sudoku';
+} from '@/lib/sudokuScoreboard';
+import type { Difficulty } from '@/types/sudoku';
 import Board from './sudoku/Board';
 import Controls from './sudoku/Controls';
 import HighScoreBoard from './sudoku/HighScoreBoard';

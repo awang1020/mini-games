@@ -52,7 +52,21 @@ const WORDS = [
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
 const MAX_ATTEMPTS = 6;
 
-const getRandomWord = () => WORDS[Math.floor(Math.random() * WORDS.length)];
+const FIXED_WORDS = [
+  'amitié', 'arbre', 'avion', 'bateau', 'bonjour', 'café', 'chanson', 'château', 'chouette', 'citrouille', 'clé',
+  'cœur', 'croissant', 'école', 'étoile', 'fleur', 'forêt', 'fromage', 'garçon', 'hirondelle', 'hiver', 'jouet',
+  'lumière', 'maison', 'montagne', 'musique', 'nuage', 'papillon', 'parapluie', 'patience', 'plage', 'poisson',
+  'porte', 'printemps', 'renard', 'soleil', 'sourire', 'téléphone', 'tranquille', 'univers', 'voiture',
+];
+
+const getRandomWord = () => FIXED_WORDS[Math.floor(Math.random() * FIXED_WORDS.length)];
+
+const safeNormalizeText = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae');
 
 const normalizeText = (value: string) =>
   value
@@ -73,7 +87,7 @@ const Hangman: FC = () => {
   const startNewGame = useCallback(() => {
     const word = getRandomWord();
     setSelectedWord(word);
-    setNormalizedWord(normalizeText(word.toLowerCase()));
+    setNormalizedWord(safeNormalizeText(word.toLowerCase()));
     setGuessedLetters([]);
     setIncorrectGuesses(0);
     setHasRecordedResult(false);
@@ -89,7 +103,7 @@ const Hangman: FC = () => {
         return;
       }
 
-      const normalizedLetter = normalizeText(letter.toLowerCase());
+      const normalizedLetter = safeNormalizeText(letter.toLowerCase());
 
       if (guessedLetters.includes(normalizedLetter)) {
         return;
