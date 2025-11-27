@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useInterval } from "@/lib/hooks";
 
 type Point = { x: number; y: number };
 type Dir = { x: number; y: number };
@@ -36,17 +37,7 @@ function randomFreeCell(occupied: Point[]): Point {
     if (!occupied.some((q) => eq(p, q))) return p;
   }
 }
-function useInterval(callback: () => void, delay: number | null) {
-  const saved = useRef(callback);
-  useEffect(() => {
-    saved.current = callback;
-  }, [callback]);
-  useEffect(() => {
-    if (delay === null) return;
-    const id = setInterval(() => saved.current(), delay);
-    return () => clearInterval(id);
-  }, [delay]);
-}
+// useInterval now shared from @/lib/hooks
 
 export default function SnakeRelax() {
   // Coordinate system: x = column (left→right), y = row (top→bottom), both 0..19

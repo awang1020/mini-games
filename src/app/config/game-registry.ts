@@ -1,25 +1,25 @@
 import type { GameConfig, GameId, GameMetadata } from '@/types/game';
 
-import ConnectFour from '../components/ConnectFour';
-import FlappyBird from '../components/FlappyBird';
-import Game2048 from '../components/Game2048';
-import Hangman from '../components/Hangman';
-import MemoryGame from '../components/MemoryGame';
-import RockPaperScissors from '../components/RockPaperScissors';
-import Sudoku from '../components/Sudoku';
-import TicTacToe from '../components/TicTacToe';
-import Tetris from '../components/Tetris';
-import SnakeRelax from '../components/SnakeRelax';
-import ConnectFourIcon from '../components/icons/ConnectFourIcon';
-import FlappyBirdIcon from '../components/icons/FlappyBirdIcon';
-import Game2048Icon from '../components/icons/Game2048Icon';
-import HangmanIcon from '../components/icons/HangmanIcon';
-import MemoryGameIcon from '../components/icons/MemoryGameIcon';
-import RockPaperScissorsIcon from '../components/icons/RockPaperScissorsIcon';
-import SudokuIcon from '../components/icons/SudokuIcon';
-import TicTacToeIcon from '../components/icons/TicTacToeIcon';
-import TetrisIcon from '../components/icons/TetrisIcon';
-import SnakeIcon from '../components/icons/SnakeIcon';
+import ConnectFour from '@/app/components/ConnectFour';
+import FlappyBird from '@/app/components/FlappyBird';
+import Game2048 from '@/app/components/Game2048';
+import Hangman from '@/app/components/Hangman';
+import MemoryGame from '@/app/components/MemoryGame';
+import RockPaperScissors from '@/app/components/RockPaperScissors';
+import Sudoku from '@/app/components/Sudoku';
+import TicTacToe from '@/app/components/TicTacToe';
+import Tetris from '@/app/components/Tetris';
+import SnakeRelax from '@/app/components/SnakeRelax';
+import ConnectFourIcon from '@/app/components/icons/ConnectFourIcon';
+import FlappyBirdIcon from '@/app/components/icons/FlappyBirdIcon';
+import Game2048Icon from '@/app/components/icons/Game2048Icon';
+import HangmanIcon from '@/app/components/icons/HangmanIcon';
+import MemoryGameIcon from '@/app/components/icons/MemoryGameIcon';
+import RockPaperScissorsIcon from '@/app/components/icons/RockPaperScissorsIcon';
+import SudokuIcon from '@/app/components/icons/SudokuIcon';
+import TicTacToeIcon from '@/app/components/icons/TicTacToeIcon';
+import TetrisIcon from '@/app/components/icons/TetrisIcon';
+import SnakeIcon from '@/app/components/icons/SnakeIcon';
 
 export const gameRegistry: Record<GameId, GameConfig> = {
   'tic-tac-toe': {

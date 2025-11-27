@@ -1,100 +1,128 @@
 # Mini Games Arcade
 
-A polished collection of classic browser games built with Next.js 14, TypeScript, and Tailwind CSS. This project demonstrates component-driven architecture, accessible game interfaces, and modern frontend tooling—perfect for showcasing engineering craftsmanship to recruiters or contributors.
+A polished collection of classic browser games built with Next.js 14, TypeScript, and Tailwind CSS. The arcade demonstrates component‑driven design, accessible interactions, and clean separation of game logic from UI.
 
-## ✨ Features
+## Features
 
-- **Six playable games** including Tic Tac Toe, Rock Paper Scissors, Memory, 2048, Sudoku, and Hangman.
-- **Single-page arcade experience** with a reusable game registry that drives routing, icons, rules, and component loading.
-- **TypeScript-first codebase** with strict typing for game metadata, rule sets, and shared UI primitives.
-- **Accessible controls** (keyboard support, focus states, aria labels) to ensure a broad audience can enjoy the games.
-- **Responsive Tailwind styling** and dedicated CSS modules where bespoke visuals are required.
+- Multiple games: Tic‑Tac‑Toe (PvP + AI), Rock‑Paper‑Scissors, Memory, 2048, Sudoku, Hangman, Tetris, Flappy Bird, and Snake Relax.
+- Single‑page arcade with a reusable game registry that drives icons, rules, and component loading.
+- TypeScript‑first with strict types across metadata, rules, and shared UI primitives.
+- Accessible controls (keyboard focus, aria labels) and responsive Tailwind styling.
 
-## 🕹 Available Games
+## Games Overview
 
 | Game | Highlights |
 | --- | --- |
-| Tic Tac Toe | Classic 3x3 grid with win/draw detection and quick reset. |
-| Rock, Paper, Scissors | Instant computer opponent with animated result card. |
-| Memory Game | Flip-and-match cards with move counter and animated tiles. |
-| 2048 | Keyboard and on-screen controls, score tracking, and win/lose overlays. |
-| Sudoku | Timed puzzles with difficulty settings, hints, and persistent state. |
-| Hangman | Animated scaffold with improved typography and accessible keyboard. |
+| Tic‑Tac‑Toe | PvP or VS AI with Easy/Medium/Hard/Expert levels, alternating starter, “AI thinking” indicator. |
+| Snake Relax | 20×20 pastel grid, wrap‑around edges, soft collision reset, score + high score, keyboard + swipe. |
+| 2048 | Keyboard/on‑screen controls, score tracking, win/lose overlays. |
+| Sudoku | Difficulty settings, hints, and persistent state. |
+| Memory Game | Flip‑and‑match cards with move counter. |
+| Rock‑Paper‑Scissors | Instant computer opponent with result display. |
+| Hangman | Accessible on‑screen keyboard with improved typography. |
+| Tetris | Classic line clears with level progression. |
+| Flappy Bird | Tap/flap to navigate obstacles. |
 
-## 🧱 Architecture Highlights
+## Architecture Highlights
 
-- `src/app/config/game-registry.ts` centralizes game metadata, rule sets, and component registration for maintainable scalability.
-- Shared TypeScript models live in `src/types`, making it simple to add new games without duplicating types.
-- Feature components reside in `src/app/components`, grouped by domain (e.g., `sudoku/`, `icons/`) to encourage cohesion.
-- Utility logic such as the 2048 board math and Sudoku generation is isolated in `src/lib` for reuse and focused testing.
+- `src/app/config/game-registry.ts` centralizes game metadata, rule sets, and component registration.
+- Shared models live in `src/types/`; UI components in `src/app/components/` grouped by feature.
+- Pure game logic in `src/lib/` (e.g., 2048, Sudoku, Tetris) for reuse and testability.
+- Shared hook `useInterval` in `src/lib/hooks.ts` to avoid duplication.
 
-## 🛠 Tech Stack
+## Tech Stack
 
-- [Next.js 14](https://nextjs.org/) with the App Router
-- [React 18](https://react.dev/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
+- Next.js 14 (App Router), React 18
+- TypeScript, Tailwind CSS
 - ESLint with `eslint-config-next`
 
-## 🚀 Getting Started
+## Getting Started
 
-### Prerequisites
+Prerequisites: Node.js 18+, npm 8+
 
-- Node.js 18 or newer
-- npm 8+
-
-### Installation
+Install dependencies:
 
 ```bash
-npm install
+npm ci
 ```
 
-### Local Development
+Run locally:
 
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` to launch the arcade UI.
+Visit `http://localhost:3000`.
 
-### Quality Checks
+Lint:
 
 ```bash
 npm run lint
 ```
 
-### Production Build
+Build + start production:
 
 ```bash
 npm run build
 npm run start
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-├── src
-│   ├── app
-│   │   ├── components          # Reusable UI and game implementations
-│   │   ├── config              # Game registry and shared app configuration
-│   │   ├── globals.css         # Tailwind layers and global styles
-│   │   └── page.tsx            # Arcade entry point with dynamic rendering
-│   ├── lib                     # Game algorithms and data helpers
-│   └── types                   # Shared TypeScript contracts
-├── public                      # Static assets (memory cards, icons, etc.)
-├── package.json                # Scripts and dependency definitions
-└── README.md                   # Project overview and contributor guide
+src/
+  app/
+    components/        # Reusable UI and game implementations
+    config/            # Game registry and shared app config
+    globals.css        # Tailwind layers and global styles
+    page.tsx           # Arcade entry (menu + game/rules)
+  lib/                 # Game algorithms, shared hooks
+  types/               # Shared TypeScript contracts
+public/                # Static assets (icons, images, etc.)
 ```
 
-## 🧑‍💻 Development Guidelines
+## Development Guidelines
 
-- Add new games by extending the registry in `src/app/config/game-registry.ts`—define metadata, rules, and the component entry point.
-- Keep game logic pure and colocated in `src/lib` to enable future testing or reuse.
-- Use Tailwind utility classes for layout and typography; reserve CSS modules for complex, game-specific styling.
-- Maintain accessibility with keyboard interactions, focus management, and `aria-*` attributes.
+- Add new games via `src/app/config/game-registry.ts` (metadata, rules, component).
+- Keep game logic in `src/lib/` and UI in `src/app/components/`.
+- Prefer alias imports `@/...` for clarity and safer refactors.
+- Maintain accessibility: keyboard navigation, focus rings, meaningful `aria-*`.
 
-## 🙌 Contributing
+## GitHub: Push Safely
 
-Issues and pull requests are welcome. Please run `npm run lint` before submitting changes to ensure code quality and consistency.
+The repository includes a `.gitignore` configured for Node/Next.js. It prevents committing heavy or sensitive files:
+
+- Ignored: `node_modules/`, `.next/`, `out/`, `dist/`, `logs/`, `*.log`, `.DS_Store`, `.vscode/`, `*.tsbuildinfo`, `.env*.local`.
+- Keep secrets in `.env.local` (never commit env files).
+
+Typical push flow:
+
+```bash
+# Review changes
+git status
+
+# Stage and commit
+git add -A
+git commit -m "feat: add Snake Relax + Tic-Tac-Toe AI levels"
+
+# Set main branch (first time)
+git branch -M main
+
+# Add remote (first time)
+git remote add origin https://github.com/<your-username>/<your-repo>.git
+
+# Or update remote URL if it already exists
+# git remote set-url origin https://github.com/<your-username>/<your-repo>.git
+
+# Push
+git push -u origin main
+```
+
+For large media, consider Git LFS. Keep private keys/secrets out of the repo.
+
+## Contributing
+
+Issues and PRs are welcome. Please run `npm run lint` and `npm run build` before opening a PR.
 
 Enjoy the games and feel free to extend the arcade with new ideas!
+

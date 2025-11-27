@@ -3,9 +3,9 @@
 import type { FC } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
-import GameMenu from './components/GameMenu';
-import GameRules from './components/GameRules';
-import { gameMetadataList, gameRegistry } from './config/game-registry';
+import GameMenu from '@/app/components/GameMenu';
+import GameRules from '@/app/components/GameRules';
+import { gameMetadataList, gameRegistry } from '@/app/config/game-registry';
 import type { GameId } from '@/types/game';
 
 const Home: FC = () => {
