@@ -4,7 +4,6 @@ import type { FC } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
 type SquareValue = 'X' | 'O' | null;
-type Difficulty = 'OFF' | 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT';
 
 const WINNING_LINES: Array<[number, number, number]> = [
   [0, 1, 2],
@@ -19,28 +18,24 @@ const WINNING_LINES: Array<[number, number, number]> = [
 
 const createInitialBoard = (): SquareValue[] => Array(9).fill(null);
 
-const calculateWinner = (squares: SquareValue[]): SquareValue | 'Draw' | null => {
-  for (const [a, b, c] of WINNING_LINES) {
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return squares.every((square) => square !== null) ? 'Draw' : null;
-};
+type Difficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT';
 
-// AI helpers
-const getAvailableMoves = (s: SquareValue[]) => s.map((v, i) => (v === null ? i : -1)).filter((i) => i !== -1);
-const tryMoveWinner = (s: SquareValue[], idx: number, val: 'X' | 'O') => {
-  const next = s.slice();
+const getAvailableMoves = (squares: SquareValue[]) =>
+  squares.map((v, i) => (v === null ? i : -1)).filter((i) => i !== -1);
+
+const tryMoveWinner = (squares: SquareValue[], idx: number, val: 'X' | 'O') => {
+  const next = squares.slice();
   next[idx] = val;
   return calculateWinner(next);
 };
+
 const scoreTerminal = (result: SquareValue | 'Draw' | null) => {
   if (result === 'O') return 1;
   if (result === 'X') return -1;
   if (result === 'Draw') return 0;
   return null;
 };
+
 const minimax = (
   board: SquareValue[],
   maximizing: boolean, // true => 'O' (AI), false => 'X' (human)
@@ -48,6 +43,7 @@ const minimax = (
   const terminal = calculateWinner(board);
   const terminalScore = scoreTerminal(terminal);
   if (terminalScore !== null) return { score: terminalScore, move: null };
+
   const moves = getAvailableMoves(board);
   if (maximizing) {
     let best = { score: -Infinity, move: moves[0] ?? null };
@@ -70,7 +66,68 @@ const minimax = (
   }
 };
 
-const TicTacToe: FC = () => {
+interface Props { difficulty?: Difficulty }
+
+const calculateWinner = (squares: SquareValue[]): SquareValue | 'Draw' | null => {
+  for (const [a, b, c] of WINNING_LINES) {
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+
+  return squares.every((square) => square !== null) ? 'Draw' : null;
+};
+
+// --- AI helpers ---
+type Difficulty = 'OFF' | 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT';
+
+const getAvailableMoves = (s: SquareValue[]) =>
+  s.map((v, i) => (v === null ? i : -1)).filter((i) => i !== -1);
+
+const tryMoveWinner = (s: SquareValue[], idx: number, val: 'X' | 'O') => {
+  const next = s.slice();
+  next[idx] = val;
+  return calculateWinner(next);
+};
+
+const scoreTerminal = (result: SquareValue | 'Draw' | null) => {
+  if (result === 'O') return 1;
+  if (result === 'X') return -1;
+  if (result === 'Draw') return 0;
+  return null;
+};
+
+const minimax = (
+  board: SquareValue[],
+  maximizing: boolean,
+): { score: number; move: number | null } => {
+  const terminal = calculateWinner(board);
+  const terminalScore = scoreTerminal(terminal);
+  if (terminalScore !== null) return { score: terminalScore, move: null };
+
+  const moves = getAvailableMoves(board);
+  if (maximizing) {
+    let best = { score: -Infinity, move: moves[0] ?? null };
+    for (const m of moves) {
+      const next = board.slice();
+      next[m] = 'O';
+      const res = minimax(next, false);
+      if (res.score > best.score) best = { score: res.score, move: m };
+    }
+    return best;
+  } else {
+    let best = { score: Infinity, move: moves[0] ?? null };
+    for (const m of moves) {
+      const next = board.slice();
+      next[m] = 'X';
+      const res = minimax(next, true);
+      if (res.score < best.score) best = { score: res.score, move: m };
+    }
+    return best;
+  }
+};
+
+const TicTacToe: FC<Props> = ({ difficulty = 'MEDIUM' }) => {
   const [board, setBoard] = useState<SquareValue[]>(createInitialBoard);
   const [isXNext, setIsXNext] = useState(true);
   // Tracks who should start the NEXT game; flips after every completed game
@@ -79,11 +136,10 @@ const TicTacToe: FC = () => {
   const [hasRecordedResult, setHasRecordedResult] = useState(false);
   const [aiThinking, setAiThinking] = useState(false);
   const [botDifficulty, setBotDifficulty] = useState<Difficulty>('OFF');
-  const [lastBotLevel, setLastBotLevel] = useState<Exclude<Difficulty, 'OFF'>>('MEDIUM');
+  const [aiThinking, setAiThinking] = useState(false);
 
   const winner = useMemo(() => calculateWinner(board), [board]);
 
-  // Record result and flip next starter
   useEffect(() => {
     if (!winner || hasRecordedResult) {
       return;
@@ -99,33 +155,23 @@ const TicTacToe: FC = () => {
       return { ...previousScores, draws: previousScores.draws + 1 };
     });
 
+    // Mark that we've recorded this game result, and flip next game's starter
     setHasRecordedResult(true);
     setStarterIsX((prev) => !prev);
   }, [winner, hasRecordedResult]);
 
-  // Player click
   const handleClick = (index: number) => {
-    if (winner || board[index]) return;
-    const botActive = botDifficulty !== 'OFF';
-
-    if (botActive) {
-      // Player is always X in bot mode; block during AI or on O turn
-      if (aiThinking || !isXNext) return;
-      setBoard((previousBoard) => {
-        const nextBoard = [...previousBoard];
-        nextBoard[index] = 'X';
-        return nextBoard;
-      });
-      setIsXNext(false);
-    } else {
-      // PvP
-      setBoard((previousBoard) => {
-        const nextBoard = [...previousBoard];
-        nextBoard[index] = isXNext ? 'X' : 'O';
-        return nextBoard;
-      });
-      setIsXNext((previous) => !previous);
+    // Player is always 'X'. Disable during AI move and after game.
+    if (aiThinking || winner || !isXNext || board[index]) {
+      return;
     }
+
+    setBoard((previousBoard) => {
+      const nextBoard = [...previousBoard];
+      nextBoard[index] = 'X';
+      return nextBoard;
+    });
+    setIsXNext(false);
   };
 
   const handleReset = () => {
@@ -135,38 +181,8 @@ const TicTacToe: FC = () => {
     setHasRecordedResult(false);
   };
 
-  // Helper to decide AI move based on difficulty
-  const decideAIMove = (b: SquareValue[], diff: Difficulty): number => {
-    const available = getAvailableMoves(b);
-    const randomMove = () => available[Math.floor(Math.random() * available.length)];
-
-    if (diff === 'EASY') {
-      if (Math.random() < 0.15) {
-        const block = available.find((m) => tryMoveWinner(b, m, 'X') === 'X');
-        return block ?? randomMove();
-      }
-      return randomMove();
-    }
-    if (diff === 'MEDIUM') {
-      const winNow = available.find((m) => tryMoveWinner(b, m, 'O') === 'O');
-      if (winNow !== undefined) return winNow;
-      const block = available.find((m) => tryMoveWinner(b, m, 'X') === 'X');
-      return block ?? randomMove();
-    }
-    // HARD/EXPERT
-    const best = minimax(b, true).move;
-    if (best == null) return randomMove();
-    if (diff === 'HARD' && Math.random() < 0.15) {
-      const others = available.filter((m) => m !== best);
-      return others.length ? others[Math.floor(Math.random() * others.length)] : best;
-    }
-    return best;
-  };
-
-  // AI turn (only when bot is active and it's O's turn)
+  // AI turn: triggers whenever it's O's turn and game not over
   useEffect(() => {
-    const botActive = botDifficulty !== 'OFF';
-    if (!botActive) return;
     if (winner) return;
     if (isXNext) return; // human's turn
     if (aiThinking) return;
@@ -174,10 +190,39 @@ const TicTacToe: FC = () => {
     const available = getAvailableMoves(board);
     if (available.length === 0) return;
 
+    const randomMove = () => available[Math.floor(Math.random() * available.length)];
+
+    const decideMove = (): number => {
+      if (difficulty === 'EASY') {
+        // 15% chance to block immediate X win, else random
+        if (Math.random() < 0.15) {
+          const block = available.find((m) => tryMoveWinner(board, m, 'X') === 'X');
+          return block ?? randomMove();
+        }
+        return randomMove();
+      }
+      if (difficulty === 'MEDIUM') {
+        // Win now if possible
+        const winNow = available.find((m) => tryMoveWinner(board, m, 'O') === 'O');
+        if (winNow !== undefined) return winNow;
+        // Block immediate X win
+        const block = available.find((m) => tryMoveWinner(board, m, 'X') === 'X');
+        return block ?? randomMove();
+      }
+      // HARD/EXPERT use Minimax, HARD with mistake chance
+      const best = minimax(board, true).move;
+      if (best == null) return randomMove();
+      if (difficulty === 'HARD' && Math.random() < 0.15) {
+        const others = available.filter((m) => m !== best);
+        return others.length ? others[Math.floor(Math.random() * others.length)] : best;
+      }
+      return best;
+    };
+
     setAiThinking(true);
-    const delay = botDifficulty === 'EXPERT' ? 0 : 120;
+    const delay = difficulty === 'EXPERT' ? 0 : 120;
     const t = setTimeout(() => {
-      const move = decideAIMove(board, botDifficulty);
+      const move = decideMove();
       setBoard((prev) => {
         const next = prev.slice();
         next[move] = 'O';
@@ -187,28 +232,7 @@ const TicTacToe: FC = () => {
       setAiThinking(false);
     }, delay);
     return () => clearTimeout(t);
-  }, [board, isXNext, winner, botDifficulty]);
-
-  // If user turns bot ON mid-turn when it's O's turn, trigger AI immediately so user can click next
-  useEffect(() => {
-    if (botDifficulty === 'OFF') return;
-    if (winner) return;
-    if (!isXNext && !aiThinking) {
-      // schedule AI move quickly
-      setAiThinking(true);
-      const t = setTimeout(() => {
-        const move = decideAIMove(board, botDifficulty);
-        setBoard((prev) => {
-          const next = prev.slice();
-          next[move] = 'O';
-          return next;
-        });
-        setIsXNext(true);
-        setAiThinking(false);
-      }, 0);
-      return () => clearTimeout(t);
-    }
-  }, [botDifficulty]);
+  }, [board, isXNext, aiThinking, winner, difficulty]);
 
   const statusMessage = useMemo(() => {
     if (!winner) {
@@ -240,73 +264,6 @@ const TicTacToe: FC = () => {
       <p className="text-xl font-semibold" aria-live="polite">
         {statusMessage}
       </p>
-      {/* Reserve space for AI thinking to avoid layout shift */}
-      <div className="flex min-h-[1.25rem] items-center justify-center">
-        <div
-          className={`flex items-center gap-2 text-sm text-gray-300 ${
-            botDifficulty !== 'OFF' && aiThinking && !winner ? 'visible' : 'invisible'
-          }`}
-          aria-live="polite"
-        >
-          <svg className="h-4 w-4 animate-spin text-gray-300" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-          </svg>
-          <span>AI thinking…</span>
-        </div>
-      </div>
-      {/* Mode & Level controls (premium segmented buttons) */}
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-center">
-          <div className="inline-flex rounded-full bg-gray-800/60 p-1 ring-1 ring-gray-700 shadow-sm">
-            <button
-              type="button"
-              onClick={() => setBotDifficulty('OFF')}
-              className={`${
-                botDifficulty === 'OFF'
-                  ? 'bg-indigo-500 text-white shadow hover:bg-indigo-500'
-                  : 'text-gray-200 hover:bg-gray-700'
-              } rounded-full px-4 py-1.5 text-sm transition`}
-            >
-              Player vs Player
-            </button>
-            <button
-              type="button"
-              onClick={() => botDifficulty === 'OFF' ? setBotDifficulty(lastBotLevel) : null}
-              className={`${
-                botDifficulty !== 'OFF'
-                  ? 'bg-indigo-500 text-white shadow hover:bg-indigo-500'
-                  : 'text-gray-200 hover:bg-gray-700'
-              } rounded-full px-4 py-1.5 text-sm transition`}
-            >
-              VS AI
-            </button>
-          </div>
-        </div>
-
-        {botDifficulty !== 'OFF' && (
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-            {(['EASY','MEDIUM','HARD','EXPERT'] as const).map((lvl) => (
-              <button
-                key={lvl}
-                type="button"
-                onClick={() => {
-                  setLastBotLevel(lvl);
-                  setBotDifficulty(lvl);
-                }}
-                className={`rounded-full px-3 py-1.5 text-sm ring-1 transition ${
-                  botDifficulty === lvl
-                    ? 'bg-indigo-500 text-white ring-indigo-400 shadow'
-                    : 'bg-gray-800/60 text-gray-200 ring-gray-700 hover:bg-gray-700'
-                }`}
-                aria-pressed={botDifficulty === lvl}
-              >
-                {lvl.charAt(0) + lvl.slice(1).toLowerCase()}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
       <div className="grid grid-cols-3 gap-3">
         {board.map((value, index) => {
           const colorClass = value === 'X' ? 'text-blue-400' : value === 'O' ? 'text-rose-400' : 'text-white';
@@ -317,7 +274,6 @@ const TicTacToe: FC = () => {
               className={`flex h-24 w-24 items-center justify-center rounded-lg border-2 border-gray-400 text-4xl font-bold transition hover:border-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 ${colorClass}`}
               onClick={() => handleClick(index)}
               aria-label={value ? `Cell ${index + 1} containing ${value}` : `Select cell ${index + 1}`}
-              disabled={aiThinking && botDifficulty !== 'OFF'}
             >
               {value}
             </button>

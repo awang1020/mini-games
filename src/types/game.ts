@@ -9,7 +9,8 @@ export type GameId =
   | 'hangman'
   | 'flappy-bird'
   | 'connect-four'
-  | 'tetris';
+  | 'tetris'
+  | 'snake-relax';
 
 export interface GameIconProps {
   className?: string;

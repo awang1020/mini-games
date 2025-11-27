@@ -9,6 +9,7 @@ import RockPaperScissors from '../components/RockPaperScissors';
 import Sudoku from '../components/Sudoku';
 import TicTacToe from '../components/TicTacToe';
 import Tetris from '../components/Tetris';
+import SnakeRelax from '../components/SnakeRelax';
 import ConnectFourIcon from '../components/icons/ConnectFourIcon';
 import FlappyBirdIcon from '../components/icons/FlappyBirdIcon';
 import Game2048Icon from '../components/icons/Game2048Icon';
@@ -18,6 +19,7 @@ import RockPaperScissorsIcon from '../components/icons/RockPaperScissorsIcon';
 import SudokuIcon from '../components/icons/SudokuIcon';
 import TicTacToeIcon from '../components/icons/TicTacToeIcon';
 import TetrisIcon from '../components/icons/TetrisIcon';
+import SnakeIcon from '../components/icons/SnakeIcon';
 
 export const gameRegistry: Record<GameId, GameConfig> = {
   'tic-tac-toe': {
@@ -172,6 +174,25 @@ export const gameRegistry: Record<GameId, GameConfig> = {
         'Tap, click, or press Space to make the bird flap upward.',
         'Navigate through the gaps between the pipes—touching them ends the run.',
         'Each pair of pipes you pass earns one point. Try to beat your best score!',
+      ],
+    },
+  },
+  'snake-relax': {
+    metadata: {
+      id: 'snake-relax',
+      title: 'Snake Relax',
+      description: 'Serpent zen: wrap-around, pommes, transitions pastel.',
+      icon: SnakeIcon,
+    },
+    component: SnakeRelax,
+    rules: {
+      title: 'Snake Relax',
+      rules: [
+        'Le serpent se déplace automatiquement toutes les 120 ms.',
+        'Les bords sont en wrap-around: tu traverses et reviens de l’autre côté.',
+        'Mange des pommes pour grandir et augmenter le score.',
+        'Collision avec soi-même = redémarrage doux (pas de game over agressif).',
+        'Contrôles: flèches/WASD et swipe sur mobile.',
       ],
     },
   },
