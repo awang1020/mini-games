@@ -10,6 +10,7 @@ import Sudoku from '@/app/components/Sudoku';
 import TicTacToe from '@/app/components/TicTacToe';
 import Tetris from '@/app/components/Tetris';
 import SnakeRelax from '@/app/components/SnakeRelax';
+import TypingSpeed from '@/app/components/TypingSpeed';
 import ConnectFourIcon from '@/app/components/icons/ConnectFourIcon';
 import FlappyBirdIcon from '@/app/components/icons/FlappyBirdIcon';
 import Game2048Icon from '@/app/components/icons/Game2048Icon';
@@ -20,6 +21,7 @@ import SudokuIcon from '@/app/components/icons/SudokuIcon';
 import TicTacToeIcon from '@/app/components/icons/TicTacToeIcon';
 import TetrisIcon from '@/app/components/icons/TetrisIcon';
 import SnakeIcon from '@/app/components/icons/SnakeIcon';
+import TypingIcon from '@/app/components/icons/TypingIcon';
 
 export const gameRegistry: Record<GameId, GameConfig> = {
   'tic-tac-toe': {
@@ -193,6 +195,24 @@ export const gameRegistry: Record<GameId, GameConfig> = {
         'Mange des pommes pour grandir et augmenter le score.',
         'Collision avec soi-même = redémarrage doux (pas de game over agressif).',
         'Contrôles: flèches/WASD et swipe sur mobile.',
+      ],
+    },
+  },
+  'typing-speed': {
+    metadata: {
+      id: 'typing-speed',
+      title: 'Typing Speed',
+      description: 'Type words fast and accurately before time runs out.',
+      icon: TypingIcon,
+    },
+    component: TypingSpeed,
+    rules: {
+      title: 'Typing Speed',
+      rules: [
+        'Press Start to begin; type the current word then Space/Enter to submit.',
+        'Live WPM and accuracy appear in the top bar; input stays focused.',
+        'Words must match exactly to count as correct; backspace is not penalized before submit.',
+        'Pick duration in the dropdown; results show chart + CSV export at the end.',
       ],
     },
   },

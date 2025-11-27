@@ -10,7 +10,8 @@ export type GameId =
   | 'flappy-bird'
   | 'connect-four'
   | 'tetris'
-  | 'snake-relax';
+  | 'snake-relax'
+  | 'typing-speed';
 
 export interface GameIconProps {
   className?: string;

@@ -114,3 +114,14 @@
 .animate-token-drop {
   animation: connect-token-drop 0.35s ease-out;
 }
+
+/* Generic section title styling (used across result cards) */
+.section-title {
+  font-size: 0.875rem; /* ~14px */
+  font-weight: bold;
+  color: #7ab7ff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 16px;
+  margin-bottom: 0.25rem;
+}
