@@ -84,20 +84,6 @@ src/
 public/                # Static assets (icons, images, etc.)
 ```
 
-## Mental Calculation • Chill Mode
-
-A minimal, pastel arithmetic game designed to be relaxing but rewarding:
-
-- Levels (1–4):
-  - L1: + only, numbers 1–10, 15s timer, 10 XP to level up
-  - L2: +/−, numbers 1–15, 12s timer, +15 XP
-  - L3: +/− (1–30), × up to 12, 10s timer, +20 XP
-  - L4 (Expert): +/− (1–50), × up to 15, integer ÷ up to 15, 8s timer (endless)
-- XP ring per level (resets only on level-up); streak multiplier to score; small encouragement banner above the exercise.
-- Golden Questions (every ~10–20): highlighted softly, +2 XP bonus.
-- Slow circular timer at the bottom; Enter to submit; Restart preserves the chill vibe.
-
-
 ## Development Guidelines
 
 - Add new games via `src/app/config/game-registry.ts` (metadata, rules, component).
