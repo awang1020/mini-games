@@ -11,7 +11,7 @@ export type GameId =
   | 'connect-four'
   | 'tetris'
   | 'snake-relax'
-  | 'typing-speed';
+  | 'typing-speed'
   | 'mental-calc-chill';
 
 export interface GameIconProps {
