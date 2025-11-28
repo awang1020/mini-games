@@ -4,7 +4,7 @@ A polished collection of classic browser games built with Next.js 14, TypeScript
 
 ## Features
 
-- Multiple games: Tic‑Tac‑Toe (PvP + AI), Rock‑Paper‑Scissors, Memory, 2048, Sudoku, Hangman, Tetris, Flappy Bird, and Snake Relax.
+- Multiple games: Tic-Tac-Toe (PvP + AI), Connect Four (PvP + AI), Rock-Paper-Scissors, Memory, 2048, Sudoku, Hangman, Tetris, Flappy Bird, Snake Relax, and Mental Calculation Chill Mode.
 - Single‑page arcade with a reusable game registry that drives icons, rules, and component loading.
 - TypeScript‑first with strict types across metadata, rules, and shared UI primitives.
 - Accessible controls (keyboard focus, aria labels) and responsive Tailwind styling.
@@ -13,12 +13,14 @@ A polished collection of classic browser games built with Next.js 14, TypeScript
 
 | Game | Highlights |
 | --- | --- |
-| Tic‑Tac‑Toe | PvP or VS AI with Easy/Medium/Hard/Expert levels, alternating starter, “AI thinking” indicator. |
+| Tic-Tac-Toe | PvP or VS AI with Easy/Medium/Hard/Expert levels, alternating starter, "AI thinking" indicator. |
+| Connect Four | PvP or VS AI with Easy/Medium/Hard/Expert levels, keyboard support, Undo, and a scoreboard. |
 | Snake Relax | 20×20 pastel grid, wrap‑around edges, soft collision reset, score + high score, keyboard + swipe. |
 | 2048 | Keyboard/on‑screen controls, score tracking, win/lose overlays. |
 | Sudoku | Difficulty settings, hints, and persistent state. |
 | Memory Game | Flip‑and‑match cards with move counter. |
-| Rock‑Paper‑Scissors | Instant computer opponent with result display. |
+| Rock-Paper-Scissors | Instant computer opponent with result display. |
+| Mental Calculation • Chill | Pastel arithmetic with circular timer; Levels 1–4 progression, XP ring, streaks, golden questions. |
 | Hangman | Accessible on‑screen keyboard with improved typography. |
 | Tetris | Classic line clears with level progression. |
 | Flappy Bird | Tap/flap to navigate obstacles. |
@@ -29,6 +31,7 @@ A polished collection of classic browser games built with Next.js 14, TypeScript
 - Shared models live in `src/types/`; UI components in `src/app/components/` grouped by feature.
 - Pure game logic in `src/lib/` (e.g., 2048, Sudoku, Tetris) for reuse and testability.
 - Shared hook `useInterval` in `src/lib/hooks.ts` to avoid duplication.
+- Connect Four AI utilities in `src/lib/connect-four-ai.ts` (minimax + heuristics, tunable difficulty).
 
 ## Tech Stack
 
@@ -80,6 +83,20 @@ src/
   types/               # Shared TypeScript contracts
 public/                # Static assets (icons, images, etc.)
 ```
+
+## Mental Calculation • Chill Mode
+
+A minimal, pastel arithmetic game designed to be relaxing but rewarding:
+
+- Levels (1–4):
+  - L1: + only, numbers 1–10, 15s timer, 10 XP to level up
+  - L2: +/−, numbers 1–15, 12s timer, +15 XP
+  - L3: +/− (1–30), × up to 12, 10s timer, +20 XP
+  - L4 (Expert): +/− (1–50), × up to 15, integer ÷ up to 15, 8s timer (endless)
+- XP ring per level (resets only on level-up); streak multiplier to score; small encouragement banner above the exercise.
+- Golden Questions (every ~10–20): highlighted softly, +2 XP bonus.
+- Slow circular timer at the bottom; Enter to submit; Restart preserves the chill vibe.
+
 
 ## Development Guidelines
 
