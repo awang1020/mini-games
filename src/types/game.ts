@@ -12,6 +12,7 @@ export type GameId =
   | 'tetris'
   | 'snake-relax'
   | 'typing-speed';
+  | 'mental-calc-chill';
 
 export interface GameIconProps {
   className?: string;

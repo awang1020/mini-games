@@ -11,6 +11,7 @@ import TicTacToe from '@/app/components/TicTacToe';
 import Tetris from '@/app/components/Tetris';
 import SnakeRelax from '@/app/components/SnakeRelax';
 import TypingSpeed from '@/app/components/TypingSpeed';
+import MentalCalcChill from '@/app/components/MentalCalcChill';
 import ConnectFourIcon from '@/app/components/icons/ConnectFourIcon';
 import FlappyBirdIcon from '@/app/components/icons/FlappyBirdIcon';
 import Game2048Icon from '@/app/components/icons/Game2048Icon';
@@ -22,6 +23,7 @@ import TicTacToeIcon from '@/app/components/icons/TicTacToeIcon';
 import TetrisIcon from '@/app/components/icons/TetrisIcon';
 import SnakeIcon from '@/app/components/icons/SnakeIcon';
 import TypingIcon from '@/app/components/icons/TypingIcon';
+import CalcChillIcon from '@/app/components/icons/CalcChillIcon';
 
 export const gameRegistry: Record<GameId, GameConfig> = {
   'tic-tac-toe': {
@@ -213,6 +215,24 @@ export const gameRegistry: Record<GameId, GameConfig> = {
         'Live WPM and accuracy appear in the top bar; input stays focused.',
         'Words must match exactly to count as correct; backspace is not penalized before submit.',
         'Pick duration in the dropdown; results show chart + CSV export at the end.',
+      ],
+    },
+  },
+  'mental-calc-chill': {
+    metadata: {
+      id: 'mental-calc-chill',
+      title: 'Mental Calculation Chill',
+      description: 'Soft pastel arithmetic with a gentle timer.',
+      icon: CalcChillIcon,
+    },
+    component: MentalCalcChill,
+    rules: {
+      title: 'Mental Calculation • Chill Mode',
+      rules: [
+        'A small arithmetic appears with a slow, relaxing timer.',
+        'Type your answer and press Enter or Submit.',
+        'Correct answers increase your score; timeouts move on softly.',
+        'After each answer or when time ends, a new calculation appears.',
       ],
     },
   },
