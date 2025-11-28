@@ -1,7 +1,9 @@
 'use client';
 
-import { useCallback, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
+import type { AIDifficulty } from '@/lib/connect-four-ai';
+import { pickAIMove, getAvailableColumns } from '@/lib/connect-four-ai';
 
 const ROW_COUNT = 6;
 const COLUMN_COUNT = 7;
@@ -128,6 +130,15 @@ const ConnectFour = () => {
     player2: 0,
     draws: 0,
   });
+  // VS AI controls
+  type Difficulty = 'OFF' | AIDifficulty;
+  const [botDifficulty, setBotDifficulty] = useState<Difficulty>('OFF');
+  const [lastBotLevel, setLastBotLevel] = useState<AIDifficulty>('MEDIUM');
+  const [aiThinking, setAiThinking] = useState(false);
+  // Human/AI sides and starter
+  const [humanPlayer, setHumanPlayer] = useState<Player>(1);
+  const aiPlayer: Player = humanPlayer === 1 ? 2 : 1;
+  const [starterIsHuman, setStarterIsHuman] = useState(true);
 
   const instructionsId = useId();
 
@@ -170,7 +181,12 @@ const ConnectFour = () => {
 
   const handleDrop = useCallback(
     (column: number) => {
+      const botActive = botDifficulty !== 'OFF';
       if (winner || isDraw) {
+        return;
+      }
+      // In VS AI mode, block human input on AI's turn or while AI is thinking
+      if (botActive && (currentPlayer !== humanPlayer || aiThinking)) {
         return;
       }
 
@@ -219,12 +235,12 @@ const ConnectFour = () => {
         setCurrentPlayer(player === 1 ? 2 : 1);
       }
     },
-    [board, currentPlayer, isDraw, winner],
+    [aiThinking, board, botDifficulty, currentPlayer, humanPlayer, isDraw, winner],
   );
 
   const resetGame = useCallback(() => {
     setBoard(createEmptyBoard());
-    setCurrentPlayer(1);
+    setCurrentPlayer(starterIsHuman ? humanPlayer : aiPlayer);
     setWinner(null);
     setIsDraw(false);
     setHoveredColumn(null);
@@ -232,7 +248,8 @@ const ConnectFour = () => {
     setFocusColumn(0);
     setMoveHistory([]);
     setLastMove(null);
-  }, []);
+    setAiThinking(false);
+  }, [aiPlayer, humanPlayer, starterIsHuman]);
 
   const handleRestart = useCallback(() => {
     resetGame();
@@ -265,6 +282,110 @@ const ConnectFour = () => {
       return updatedHistory;
     });
   }, []);
+
+  // AI turn when VS AI is active
+  useEffect(() => {
+    const botActive = botDifficulty !== 'OFF';
+    if (!botActive) return;
+    if (winner || isDraw) return;
+    if (currentPlayer !== aiPlayer) return;
+    if (aiThinking) return;
+
+    const available = getAvailableColumns(board as unknown as number[][]);
+    if (available.length === 0) return;
+
+    setAiThinking(true);
+    const delay = botDifficulty === 'EXPERT' ? 0 : 150;
+    const t = setTimeout(() => {
+      const level = botDifficulty === 'OFF' ? 'MEDIUM' : botDifficulty;
+      const move = pickAIMove(board as unknown as number[][], level, aiPlayer);
+      const playCol = available.includes(move) ? move : available[0];
+
+      const targetRow = findAvailableRow(board, playCol);
+      if (targetRow !== null) {
+        const nextBoard = board.map((row) => [...row]);
+        nextBoard[targetRow][playCol] = aiPlayer;
+
+        const moveRec: Move = { row: targetRow, column: playCol, player: aiPlayer, id: Date.now() };
+        const winningCells = detectWin(nextBoard, targetRow, playCol, aiPlayer);
+        const boardFull = nextBoard.every((row) => row.every((cell) => cell !== 0));
+
+        setBoard(nextBoard);
+        setMoveHistory((history) => [...history, moveRec]);
+        setLastMove(moveRec);
+
+        if (winningCells) {
+          setWinner({ player: aiPlayer, cells: winningCells });
+          setIsDraw(false);
+          setScoreboard((scores) => ({
+            ...scores,
+            player1: scores.player1 + (aiPlayer === 1 ? 1 : 0),
+            player2: scores.player2 + (aiPlayer === 2 ? 1 : 0),
+          }));
+        } else {
+          setIsDraw(boardFull);
+          if (boardFull) {
+            setScoreboard((scores) => ({ ...scores, draws: scores.draws + 1 }));
+          } else {
+            setCurrentPlayer(aiPlayer === 1 ? 2 : 1);
+          }
+        }
+      }
+      setAiThinking(false);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [board, currentPlayer, winner, isDraw, botDifficulty, aiPlayer]);
+
+  // If user turns bot ON while it's already AI's turn, trigger AI immediately
+  useEffect(() => {
+    if (botDifficulty === 'OFF') return;
+    if (winner || isDraw) return;
+    if (currentPlayer !== aiPlayer) return;
+    if (aiThinking) return;
+
+    setAiThinking(true);
+    const t = setTimeout(() => {
+      const available = getAvailableColumns(board as unknown as number[][]);
+      if (available.length === 0) {
+        setAiThinking(false);
+        return;
+      }
+      const move = pickAIMove(board as unknown as number[][], botDifficulty, aiPlayer);
+      const playCol = available.includes(move) ? move : available[0];
+      const targetRow = findAvailableRow(board, playCol);
+      if (targetRow !== null) {
+        const nextBoard = board.map((row) => [...row]);
+        nextBoard[targetRow][playCol] = aiPlayer;
+
+        const moveRec: Move = { row: targetRow, column: playCol, player: aiPlayer, id: Date.now() };
+        const winningCells = detectWin(nextBoard, targetRow, playCol, aiPlayer);
+        const boardFull = nextBoard.every((row) => row.every((cell) => cell !== 0));
+
+        setBoard(nextBoard);
+        setMoveHistory((history) => [...history, moveRec]);
+        setLastMove(moveRec);
+
+        if (winningCells) {
+          setWinner({ player: aiPlayer, cells: winningCells });
+          setIsDraw(false);
+          setScoreboard((scores) => ({
+            ...scores,
+            player1: scores.player1 + (aiPlayer === 1 ? 1 : 0),
+            player2: scores.player2 + (aiPlayer === 2 ? 1 : 0),
+          }));
+        } else {
+          setIsDraw(boardFull);
+          if (boardFull) {
+            setScoreboard((scores) => ({ ...scores, draws: scores.draws + 1 }));
+          } else {
+            setCurrentPlayer(aiPlayer === 1 ? 2 : 1);
+          }
+        }
+      }
+      setAiThinking(false);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [botDifficulty, aiPlayer]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -312,9 +433,18 @@ const ConnectFour = () => {
             aria-live="polite"
             role="status"
           >
-            <p className={`text-lg font-semibold ${statusColorClass}`}>
-              {statusMessage}
-            </p>
+            <p className={`text-lg font-semibold ${statusColorClass}`}>{statusMessage}</p>
+            <div className="mt-1 flex min-h-[1.25rem] items-center gap-2 text-sm text-gray-300" aria-live="polite">
+              {botDifficulty !== 'OFF' && aiThinking && !winner ? (
+                <>
+                  <svg className="h-4 w-4 animate-spin text-gray-300" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  <span>AI thinking.</span>
+                </>
+              ) : null}
+            </div>
           </div>
 
           <div className="relative mx-auto w-full max-w-3xl lg:mx-0">
@@ -420,6 +550,134 @@ const ConnectFour = () => {
               <h2 className="text-xl font-semibold text-amber-300">Scoreboard</h2>
               <p className="text-sm text-gray-400">Track wins, losses, and draws at a glance.</p>
             </div>
+            {/* Mode & AI Level controls */}
+            <div className="w-full max-w-sm">
+              <div className="flex items-center justify-center">
+                <div className="inline-flex rounded-full bg-gray-800/60 p-1 ring-1 ring-gray-700 shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => setBotDifficulty('OFF')}
+                    className={`${
+                      botDifficulty === 'OFF'
+                        ? 'bg-indigo-500 text-white shadow hover:bg-indigo-500'
+                        : 'text-gray-200 hover:bg-gray-700'
+                    } rounded-full px-4 py-1.5 text-sm transition`}
+                  >
+                    Player vs Player
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => (botDifficulty === 'OFF' ? setBotDifficulty(lastBotLevel) : null)}
+                    className={`${
+                      botDifficulty !== 'OFF'
+                        ? 'bg-indigo-500 text-white shadow hover:bg-indigo-500'
+                        : 'text-gray-200 hover:bg-gray-700'
+                    } rounded-full px-4 py-1.5 text-sm transition`}
+                  >
+                    VS AI
+                  </button>
+                </div>
+              </div>
+
+              {botDifficulty !== 'OFF' && (
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                  {(['EASY', 'MEDIUM', 'HARD', 'EXPERT'] as const).map((lvl) => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => {
+                        setLastBotLevel(lvl);
+                        setBotDifficulty(lvl);
+                      }}
+                      className={`rounded-full px-3 py-1.5 text-sm ring-1 transition ${
+                        botDifficulty === lvl
+                          ? 'bg-indigo-500 text-white ring-indigo-400 shadow'
+                          : 'bg-gray-800/60 text-gray-200 ring-gray-700 hover:bg-gray-700'
+                      }`}
+                      aria-pressed={botDifficulty === lvl}
+                    >
+                      {lvl.charAt(0) + lvl.slice(1).toLowerCase()}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {botDifficulty !== 'OFF' && (
+                <div className="mt-3 grid grid-cols-1 gap-3">
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Human Color</span>
+                    <div className="inline-flex rounded-full bg-gray-800/60 p-1 ring-1 ring-gray-700 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setHumanPlayer(1);
+                          resetGame();
+                        }}
+                        className={`${
+                          humanPlayer === 1
+                            ? 'bg-indigo-500 text-white shadow hover:bg-indigo-500'
+                            : 'text-gray-200 hover:bg-gray-700'
+                        } rounded-full px-3 py-1.5 text-sm transition`}
+                        aria-pressed={humanPlayer === 1}
+                      >
+                        Red
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setHumanPlayer(2);
+                          resetGame();
+                        }}
+                        className={`${
+                          humanPlayer === 2
+                            ? 'bg-indigo-500 text-white shadow hover:bg-indigo-500'
+                            : 'text-gray-200 hover:bg-gray-700'
+                        } rounded-full px-3 py-1.5 text-sm transition`}
+                        aria-pressed={humanPlayer === 2}
+                      >
+                        Yellow
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Who Starts</span>
+                    <div className="inline-flex rounded-full bg-gray-800/60 p-1 ring-1 ring-gray-700 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStarterIsHuman(true);
+                          resetGame();
+                        }}
+                        className={`${
+                          starterIsHuman
+                            ? 'bg-indigo-500 text-white shadow hover:bg-indigo-500'
+                            : 'text-gray-200 hover:bg-gray-700'
+                        } rounded-full px-3 py-1.5 text-sm transition`}
+                        aria-pressed={starterIsHuman}
+                      >
+                        Human
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStarterIsHuman(false);
+                          resetGame();
+                        }}
+                        className={`${
+                          !starterIsHuman
+                            ? 'bg-indigo-500 text-white shadow hover:bg-indigo-500'
+                            : 'text-gray-200 hover:bg-gray-700'
+                        } rounded-full px-3 py-1.5 text-sm transition`}
+                        aria-pressed={!starterIsHuman}
+                      >
+                        AI
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex w-full flex-col items-center gap-2">
               <div className="flex w-full flex-col items-center gap-2">
                 <button
