@@ -114,6 +114,7 @@ const Sudoku: FC = () => {
   const [errorCount, setErrorCount] = useState(0);
   const [hintCount, setHintCount] = useState(0);
   const [showHighScores, setShowHighScores] = useState(false);
+  const [recentScoreId, setRecentScoreId] = useState<string | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
   const [isNotesMode, setIsNotesMode] = useState(false);
   const [undoStack, setUndoStack] = useState<HistoryEntry[]>([]);

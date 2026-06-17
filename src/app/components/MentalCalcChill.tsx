@@ -117,7 +117,7 @@ const MentalCalcChill: FC = () => {
     // XP/level advance preview
     const gain = wasCorrect ? 1 + (golden ? 2 : 0) : 0;
     const willAdvance = wasCorrect && !currentCfg.endless && xp + gain >= currentCfg.xpGoal;
-    const targetLevel: LevelId = willAdvance ? Math.min((level + 1) as LevelId, 4 as LevelId) : level;
+    const targetLevel: LevelId = willAdvance ? (Math.min(level + 1, 4) as LevelId) : level;
 
     if (wasCorrect) {
       const nextStreak = streak + 1;

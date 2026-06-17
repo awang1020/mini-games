@@ -30,8 +30,10 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'tic-tac-toe',
       title: 'Tic Tac Toe',
-      description: "The classic game of X's and O's.",
+      description: "The timeless duel of X's and O's. Outwit a friend or the AI.",
       icon: TicTacToeIcon,
+      category: 'Strategy',
+      accent: 'from-sky-400 to-blue-600',
     },
     component: TicTacToe,
     rules: {
@@ -48,8 +50,10 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'connect-four',
       title: 'Connect Four',
-      description: 'Drop tokens into a 7×6 grid and connect four in any direction.',
+      description: 'Drop your tokens and line up four in a row before your rival does.',
       icon: ConnectFourIcon,
+      category: 'Strategy',
+      accent: 'from-amber-400 to-red-500',
     },
     component: ConnectFour,
     rules: {
@@ -66,8 +70,10 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'rock-paper-scissors',
       title: 'Rock, Paper, Scissors',
-      description: 'Make your choice and challenge the computer.',
+      description: 'The ultimate split-second showdown. Best of luck against the CPU.',
       icon: RockPaperScissorsIcon,
+      category: 'Casual',
+      accent: 'from-emerald-400 to-teal-600',
     },
     component: RockPaperScissors,
     rules: {
@@ -83,8 +89,10 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'memory-game',
       title: 'Memory Game',
-      description: 'Test your short-term memory with paired cards.',
+      description: 'Flip, focus, and match every pair in as few moves as you can.',
       icon: MemoryGameIcon,
+      category: 'Brain',
+      accent: 'from-fuchsia-400 to-purple-600',
     },
     component: MemoryGame,
     rules: {
@@ -100,8 +108,11 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: '2048',
       title: '2048',
-      description: 'Merge numbered tiles to reach 2048.',
+      description: 'Slide, merge, and chase that legendary 2048 tile. Just one more move…',
       icon: Game2048Icon,
+      category: 'Puzzle',
+      accent: 'from-orange-400 to-amber-600',
+      badge: 'Popular',
     },
     component: Game2048,
     rules: {
@@ -117,8 +128,11 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'tetris',
       title: 'Tetris',
-      description: 'Stack and clear lines with classic tetrominoes.',
+      description: 'Stack, rotate, and clear lines in the block-dropping classic.',
       icon: TetrisIcon,
+      category: 'Arcade',
+      accent: 'from-violet-400 to-indigo-600',
+      badge: 'Popular',
     },
     component: Tetris,
     rules: {
@@ -134,8 +148,10 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'sudoku',
       title: 'Sudoku',
-      description: 'Fill the grid while respecting Sudoku rules.',
+      description: 'A calm, logical grid to fill — with hints when you need a nudge.',
       icon: SudokuIcon,
+      category: 'Puzzle',
+      accent: 'from-cyan-400 to-blue-600',
     },
     component: Sudoku,
     rules: {
@@ -151,8 +167,10 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'hangman',
       title: 'Hangman',
-      description: 'Guess the hidden word before the hangman is complete.',
+      description: 'Guess the hidden word letter by letter before time runs out.',
       icon: HangmanIcon,
+      category: 'Word',
+      accent: 'from-rose-400 to-pink-600',
     },
     component: Hangman,
     rules: {
@@ -168,8 +186,11 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'flappy-bird',
       title: 'Flappy Bird',
-      description: 'Tap to flap through the pipes without touching them.',
+      description: 'One tap to fly. Thread every pipe and beat your best score.',
       icon: FlappyBirdIcon,
+      category: 'Arcade',
+      accent: 'from-sky-400 to-cyan-500',
+      badge: 'New',
     },
     component: FlappyBird,
     rules: {
@@ -185,8 +206,11 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'snake-relax',
       title: 'Snake Relax',
-      description: 'Serpent zen: wrap-around, pommes, transitions pastel.',
+      description: 'A zen take on Snake — soft pastels, wrap-around edges, no pressure.',
       icon: SnakeIcon,
+      category: 'Arcade',
+      accent: 'from-teal-400 to-emerald-600',
+      badge: 'Zen',
     },
     component: SnakeRelax,
     rules: {
@@ -204,8 +228,11 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'typing-speed',
       title: 'Typing Speed',
-      description: 'Type words fast and accurately before time runs out.',
+      description: 'Race the clock to test your words-per-minute and accuracy.',
       icon: TypingIcon,
+      category: 'Brain',
+      accent: 'from-blue-400 to-violet-600',
+      badge: 'New',
     },
     component: TypingSpeed,
     rules: {
@@ -222,8 +249,11 @@ export const gameRegistry: Record<GameId, GameConfig> = {
     metadata: {
       id: 'mental-calc-chill',
       title: 'Mental Calculation Chill',
-      description: 'Soft pastel arithmetic with a gentle timer.',
+      description: 'Gentle mental math with a soothing timer and pastel vibes.',
       icon: CalcChillIcon,
+      category: 'Brain',
+      accent: 'from-pink-400 to-rose-500',
+      badge: 'Zen',
     },
     component: MentalCalcChill,
     rules: {

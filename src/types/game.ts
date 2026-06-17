@@ -18,11 +18,27 @@ export interface GameIconProps {
   className?: string;
 }
 
+export type GameCategory =
+  | 'Strategy'
+  | 'Arcade'
+  | 'Puzzle'
+  | 'Brain'
+  | 'Word'
+  | 'Casual';
+
+export type GameBadge = 'New' | 'Popular' | 'Zen';
+
 export interface GameMetadata {
   id: GameId;
   title: string;
   description: string;
   icon: ComponentType<GameIconProps>;
+  /** Category used for filtering and discovery on the home arcade. */
+  category: GameCategory;
+  /** Tailwind gradient color stops (e.g. "from-sky-400 to-indigo-600") for the app-icon tile. */
+  accent: string;
+  /** Optional marketing badge surfaced on the game card. */
+  badge?: GameBadge;
 }
 
 export interface GameRuleSet {

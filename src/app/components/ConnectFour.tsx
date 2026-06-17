@@ -297,7 +297,9 @@ const ConnectFour = () => {
     setAiThinking(true);
     const delay = botDifficulty === 'EXPERT' ? 0 : 150;
     const t = setTimeout(() => {
-      const level = botDifficulty === 'OFF' ? 'MEDIUM' : botDifficulty;
+      // `botDifficulty` is already narrowed to AIDifficulty here (the early
+      // `botActive` guard above returns when it equals 'OFF').
+      const level: AIDifficulty = botDifficulty;
       const move = pickAIMove(board as unknown as number[][], level, aiPlayer);
       const playCol = available.includes(move) ? move : available[0];
 
